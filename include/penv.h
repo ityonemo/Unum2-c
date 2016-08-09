@@ -19,6 +19,8 @@ enum{
 
 // The environment struct will be defined here.  We should use the PEnv type, everywhere.
 typedef struct {
+  const int latticebits;
+  const int epochbits;
   const unsigned long long increment;
   const unsigned long long *tables[];  //the list of lookup tables
 } PEnv;

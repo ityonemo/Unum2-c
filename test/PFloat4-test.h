@@ -26,5 +26,7 @@ extern const PFloat pf1111;
 void set_PFloat4();
 void PFloat4_paritytests();
 void PFloat4_inversetests();
+void PFloat4_itertests();
+void PFloat4_synthtests();
 
 #endif

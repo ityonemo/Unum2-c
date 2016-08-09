@@ -5,6 +5,8 @@ int main(){
   set_PFloat4();
   PFloat4_paritytests();
   PFloat4_inversetests();
+  PFloat4_itertests();
+  PFloat4_synthtests();
   printf("OK\n");
   return 0;
 }

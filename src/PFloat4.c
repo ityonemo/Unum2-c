@@ -61,6 +61,8 @@ const unsigned long long *__PFloat4_TABLES[] = {
   __PFloat4_inversion_table};
 
 PEnv PFloat4_ENV = {
+  2,
+  1,
   0x1000000000000000,
   __PFloat4_TABLES,
 };

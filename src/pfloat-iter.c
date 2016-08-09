@@ -10,15 +10,16 @@ PFloat prev(PFloat x){
   return __p(__u(x) - (PENV->increment));
 }
 
+//glb:  Greatest Lower Bound
+PFloat glb(PFloat x){
+  return is_pf_ulp(x) ? prev(x) : x;
+}
+
 //lub:  Least Upper Bound
 PFloat lub(PFloat x){
   return is_pf_ulp(x) ? next(x) : x;
 }
 
-//glb:  Greatest Lower Bound
-PFloat glb(PFloat x){
-  return is_pf_ulp(x) ? prev(x) : x;
-}
 
 PFloat upper_ulp(PFloat x){
   return is_pf_ulp(x) ? x : next(x);

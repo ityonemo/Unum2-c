@@ -20,10 +20,10 @@ DEPS = $(IDEPS) $(HDEPS)
 _TDEPS = PFloat4-test.h
 TDEPS = $(patsubst %,$(TDIR)/%,$(_TDEPS))
 #general objects
-_OBJ = PFloat4.o pbound-cmp.o pbound-desc.o pbound-gen.o pbound-prop.o penv.o pfloat-iter.o pfloat-prop.o pfloat-math-inv.o
+_OBJ = PFloat4.o pbound-cmp.o pbound-desc.o pbound-gen.o pbound-prop.o penv.o pfloat-iter.o pfloat-prop.o pfloat-math-inv.o pfloat-synth.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-_TEST = pfloat-test.o PFloat4-test.o PFloat4-paritytests.o PFloat4-inversetests.o
+_TEST = pfloat-test.o PFloat4-test.o PFloat4-paritytests.o PFloat4-inversetests.o PFloat4-itertests.o PFloat4-synthtests.o
 TEST = $(patsubst %,$(TDIR)/%,$(_TEST))
 
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)

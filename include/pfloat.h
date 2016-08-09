@@ -23,6 +23,12 @@ PFloat upper_ulp(PFloat x);
 PFloat lower_ulp(PFloat x);
 
 ////////////////////////////////////////////////////////////////////////////////
+// synthesis and decomposition tools
+PFloat    pf_synth(bool negative, bool inverted, long long epoch, unsigned long long lattice);
+long long pf_epoch(PFloat value);
+unsigned long long pf_lattice(PFloat value);
+
+////////////////////////////////////////////////////////////////////////////////
 // math tools
 PFloat pf_additiveinverse(PFloat val);
 PFloat pf_multiplicativeinverse(PFloat val);
