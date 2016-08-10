@@ -17,15 +17,17 @@ typedef struct {
 
 ////////////////////////////////////////////////////////////////////////////////
 // PROPERTY functions
-bool isempty(PBound *v);
-bool issingle(PBound *v);
-bool isbound(PBound *v);
-bool isallpreals(PBound *v);
+bool isempty(const PBound *v);
+bool issingle(const PBound *v);
+bool isbound(const PBound *v);
+bool isallpreals(const PBound *v);
 
-bool roundsinf(PBound *v);
-bool roundszero(PBound *v);
-bool isnegative(PBound *v);
-bool ispositive(PBound *v);
+bool roundsinf(const PBound *v);
+bool roundszero(const PBound *v);
+bool isnegative(const PBound *v);
+bool ispositive(const PBound *v);
+
+void collapseifsingle(PBound *v);
 
 ////////////////////////////////////////////////////////////////////////////////
 // GENERATIVE functions
@@ -43,23 +45,28 @@ void set_single(PBound *dest, PFloat f);
 void set_bound(PBound *dest, PFloat lower, PFloat upper);
 void set_allreals(PBound *dest);
 
-void pcopy(PBound *dest, PBound *src);
+void pcopy(PBound *dest, const PBound *src);
+
+////////////////////////////////////////////////////////////////////////////////
+// INVERSION functions
+void additiveinverse(PBound *v);
+void multiplicativeinverse(PBound *v);
 
 ////////////////////////////////////////////////////////////////////////////////
 // COMPARISON functions
-bool eq(PBound *lhs, PBound *rhs);  //equality
-bool lt(PBound *lhs, PBound *rhs);  //less than
-bool gt(PBound *lhs, PBound *rhs);  //greater than
-bool in(PBound *lhs, PBound *rhs);  //rhs contains lhs
-bool ol(PBound *lhs, PBound *rhs);  //lhs and rhs overlap
+bool eq(const PBound *lhs, const PBound *rhs);  //equality
+bool lt(const PBound *lhs, const PBound *rhs);  //less than
+bool gt(const PBound *lhs, const PBound *rhs);  //greater than
+bool in(const PBound *lhs, const PBound *rhs);  //rhs contains lhs
+bool ol(const PBound *lhs, const PBound *rhs);  //lhs and rhs overlap
 
 ////////////////////////////////////////////////////////////////////////////////
 // ARITHMETIC functions
 
-void add(PBound *dest, PBound *lhs, PBound *rhs);
-void sub(PBound *dest, PBound *lhs, PBound *rhs);
-void mul(PBound *dest, PBound *lhs, PBound *rhs);
-void div(PBound *dest, PBound *lhs, PBound *rhs);
+void add(PBound *dest, const PBound *lhs, const PBound *rhs);
+void sub(PBound *dest, const PBound *lhs, const PBound *rhs);
+void mul(PBound *dest, const PBound *lhs, const PBound *rhs);
+void div(PBound *dest, const PBound *lhs, const PBound *rhs);
 
 ////////////////////////////////////////////////////////////////////////////////
 // DESCRIPTIVE functions

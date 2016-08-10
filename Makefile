@@ -20,10 +20,10 @@ DEPS = $(IDEPS) $(HDEPS)
 _TDEPS = PFloat4-test.h
 TDEPS = $(patsubst %,$(TDIR)/%,$(_TDEPS))
 #general objects
-_OBJ = PFloat4.o pbound-cmp.o pbound-desc.o pbound-gen.o pbound-prop.o penv.o pfloat-iter.o pfloat-prop.o pfloat-math-inv.o pfloat-synth.o
+_OBJ = PFloat4.o pbound-cmp.o pbound-desc.o pbound-gen.o pbound-prop.o pbound-inv.o pbound-mul.o pbound-div.o penv.o pfloat-iter.o pfloat-prop.o pfloat-math-inv.o pfloat-synth.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-_TEST = pfloat-test.o PFloat4-test.o PFloat4-paritytests.o PFloat4-inversetests.o PFloat4-itertests.o PFloat4-synthtests.o
+_TEST = pfloat-test.o PFloat4-test.o PFloat4-paritytests.o PFloat4-inversetests.o PFloat4-itertests.o PFloat4-synthtests.o PFloat4-multest.o
 TEST = $(patsubst %,$(TDIR)/%,$(_TEST))
 
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
@@ -39,3 +39,4 @@ test: clean $(OBJ) $(TEST) $(DEPS) $(TDEPS)
 .PHONY: clean
 clean:
 	rm -f $(ODIR)/*.o
+	rm -f $(TDIR)/*.o

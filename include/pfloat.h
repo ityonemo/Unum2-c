@@ -11,6 +11,8 @@ bool is_pf_negative(PFloat x);
 bool is_pf_inverted(PFloat x);
 bool is_pf_exact(PFloat x);
 bool is_pf_ulp(PFloat x);
+bool is_pf_inf(PFloat x);
+bool is_pf_zero(PFloat x);
 
 ////////////////////////////////////////////////////////////////////////////////
 // iteration tools
@@ -48,5 +50,10 @@ PFloat pf_multiplicativeinverse(PFloat val);
 #define __mask1 0x7FFFFFFFFFFFFFFF            //masks out all but the sign bit.
 #define __mask2 0x3FFFFFFFFFFFFFFF            //masks out all but the sign and inverse bits
 
+//special overflow constants which are dependent on the current environment.
+#define __many  (0x8000000000000000 - PENV->increment)
+#define __nmany (0x8000000000000000 + PENV->increment)
+#define __few   (0x0000000000000000 + PENV->increment)
+#define __nfew  (0x0000000000000000 - PENV->increment)
 
 #endif

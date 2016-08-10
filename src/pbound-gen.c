@@ -38,7 +38,7 @@ void set_single(PBound *dest, PFloat value){
   dest->state = SINGLETON;
   dest->lower = value;
 };
-void set_double(PBound *dest, PFloat lower, PFloat upper){
+void set_bound(PBound *dest, PFloat lower, PFloat upper){
   dest->state = STDBOUND;
   dest->lower = lower;
   dest->upper = upper;
@@ -46,3 +46,9 @@ void set_double(PBound *dest, PFloat lower, PFloat upper){
 void set_allreals(PBound *dest){
   dest->state = ALLREALS;
 };
+
+void pcopy(PBound *dest, const PBound *src){
+  dest->state = src->state;
+  dest->lower = src->lower;
+  dest->upper = src->upper;
+}

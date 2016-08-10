@@ -23,6 +23,14 @@ bool is_pf_inverted(PFloat x){
   return ((x & __inf) == 0) == ((x & __one) == 0);
 }
 
+bool is_pf_inf(PFloat x){
+  return (x == __inf);
+}
+
+bool is_pf_zero(PFloat x){
+  return (x == __zero);
+}
+
 bool is_pf_exact(PFloat x){
   return (x & (PENV->increment)) == 0;
 }

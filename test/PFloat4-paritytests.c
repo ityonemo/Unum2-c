@@ -52,3 +52,90 @@ void PFloat4_paritytests(){
   assert(!is_pf_inverted(pf0110));
   assert(!is_pf_inverted(pf0111));
 }
+
+//spot testing on some bounds properties.
+void PFloat4_boundtests(){
+  const __ngone = __inf & __one;
+  PBound testsubject = {__zero, __zero, EMPTYSET};  //create a temporary holding value.
+  /******************************************
+    TEST roundsinf
+  ******************************************/
+  //empty set test.
+  assert(!roundsinf(&testsubject));
+  //single value tests.
+  set_zero(&testsubject);
+  assert(!roundsinf(&testsubject));
+  set_one(&testsubject);
+  assert(!roundsinf(&testsubject));
+  set_inf(&testsubject);
+  assert(!roundsinf(&testsubject));
+  //test extant values.
+  set_bound(&testsubject, __ngone, __zero);
+  assert(!roundsinf(&testsubject));
+  set_bound(&testsubject, __ngone, __one);
+  assert(!roundsinf(&testsubject));
+  set_bound(&testsubject, __ngone, __inf);
+  assert( roundsinf(&testsubject));
+  set_bound(&testsubject, __zero, __ngone);
+  assert( roundsinf(&testsubject));
+  set_bound(&testsubject, __zero, __one);
+  assert(!roundsinf(&testsubject));
+  set_bound(&testsubject, __zero, __inf);
+  assert( roundsinf(&testsubject));
+  set_bound(&testsubject, __one, __ngone);
+  assert( roundsinf(&testsubject));
+  set_bound(&testsubject, __one, __zero);
+  assert( roundsinf(&testsubject));
+  set_bound(&testsubject, __one, __inf);
+  assert( roundsinf(&testsubject));
+  set_bound(&testsubject, __inf, __ngone);
+  assert( roundsinf(&testsubject));
+  set_bound(&testsubject, __inf, __zero);
+  assert( roundsinf(&testsubject));
+  set_bound(&testsubject, __inf, __one);
+  assert( roundsinf(&testsubject));
+  //allreals test
+  set_allreals(&testsubject);
+  assert(roundsinf(&testsubject));
+  /******************************************
+    TEST roundszero
+  ******************************************/
+  //empty set test.
+  set_empty(&testsubject);
+  assert(!roundszero(&testsubject));
+  //single value tests.
+  set_zero(&testsubject);
+  assert(!roundszero(&testsubject));
+  set_one(&testsubject);
+  assert(!roundszero(&testsubject));
+  set_inf(&testsubject);
+  assert(!roundszero(&testsubject));
+  //test extant values.
+  set_bound(&testsubject, __ngone, __zero);
+  assert( roundszero(&testsubject));
+  set_bound(&testsubject, __ngone, __one);
+  assert( roundszero(&testsubject));
+  set_bound(&testsubject, __ngone, __inf);
+  assert( roundszero(&testsubject));
+  set_bound(&testsubject, __zero, __ngone);
+  assert( roundszero(&testsubject));
+  set_bound(&testsubject, __zero, __one);
+  assert( roundszero(&testsubject));
+  set_bound(&testsubject, __zero, __inf);
+  assert( roundszero(&testsubject));
+  set_bound(&testsubject, __one, __ngone);
+  assert(!roundszero(&testsubject));
+  set_bound(&testsubject, __one, __zero);
+  assert( roundszero(&testsubject));
+  set_bound(&testsubject, __one, __inf);
+  assert(!roundszero(&testsubject));
+  set_bound(&testsubject, __inf, __ngone);
+  assert(!roundszero(&testsubject));
+  set_bound(&testsubject, __inf, __zero);
+  assert( roundszero(&testsubject));
+  set_bound(&testsubject, __inf, __one);
+  assert( roundszero(&testsubject));
+  //allreals test
+  set_allreals(&testsubject);
+  assert(roundszero(&testsubject));
+}

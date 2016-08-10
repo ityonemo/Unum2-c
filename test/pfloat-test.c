@@ -7,6 +7,7 @@ int main(){
   PFloat4_inversetests();
   PFloat4_itertests();
   PFloat4_synthtests();
+  PFloat4_multest();
   printf("OK\n");
   return 0;
 }

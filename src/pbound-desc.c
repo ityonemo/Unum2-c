@@ -1,20 +1,23 @@
 #include "../include/pbound.h"
 #include "../include/pfloat.h"
+#include <stdio.h>
 
 void describe(PBound *value){
   switch (value->state){
-    EMPTYSET:
-      println("empty set");
+    case EMPTYSET:
+      printf("empty set\n");
     break;
-    ALLREALS:
-      println("all real numbers");
+    case ALLREALS:
+      printf("all real numbers\n");
     break;
-    SINGLETON:
-      println("singleton: %i", bits(value->lower));
+    case SINGLETON:
+      printf("singleton: %i\n", bits(value->lower));
     break;
-    STDBOUND:
-      println("bound: %i, %i", bits(value->lower), bits(value->upper));
+    case STDBOUND:
+      printf("bound: %i, %i\n", bits(value->lower), bits(value->upper));
     break;
+    default:
+      printf("unrecognized PBound state: %i\n", value->state);
   }
 }
 

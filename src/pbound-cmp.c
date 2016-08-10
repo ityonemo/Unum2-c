@@ -5,7 +5,7 @@
 // PBound comparison functions.  Note that some of these are a bit unusual.
 
 //pbound equality
-bool eq(PBound *lhs, PBound *rhs){
+bool eq(const PBound *lhs, const PBound *rhs){
   switch(lhs->state){
     case EMPTYSET:
       return (rhs->state == EMPTYSET);
@@ -18,15 +18,15 @@ bool eq(PBound *lhs, PBound *rhs){
   }
 };
 
-extern bool __roundsinf_checked(PBound *);
+extern bool __roundsinf_checked(const PBound *);
 
 //////////////////////////////////////////////
 //TODO:  FINISH THESE PROCS
-bool lt(PBound *lhs, PBound *rhs);  //less than
-bool gt(PBound *lhs, PBound *rhs);  //greater than
+bool lt(const PBound *lhs, const PBound *rhs);  //less than
+bool gt(const PBound *lhs, const PBound *rhs);  //greater than
 
 
-bool in(PBound *lhs, PBound *rhs){
+bool in(const PBound *lhs, const PBound *rhs){
   if (rhs->state == ALLREALS) {return true;}
   if (rhs->state == EMPTYSET) {return false;}
 
@@ -60,4 +60,4 @@ bool in(PBound *lhs, PBound *rhs){
   }
 }
 
-bool ol(PBound *lhs, PBound *rhs);  //lhs and rhs overlap
+bool ol(const PBound *lhs, const PBound *rhs);  //lhs and rhs overlap

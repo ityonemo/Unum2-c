@@ -3,18 +3,18 @@
 
 //an eneumeration of the order of tables.
 enum{
-  _ADD_TABLE,
-  _ADD_CROSSED_TABLE,
-  _ADD_INVERTED_TABLE,
-  _SUB_TABLE,
-  _SUB_EPOCH_TABLE,
-  _SUB_CROSSED_TABLE,
-  _SUB_CROSSED_EPOCH_TABLE,
-  _SUB_INVERTED_TABLE,
-  _SUB_INVERTED_EPOCH_TABLE,
-  _MUL_TABLE,
-  _DIV_TABLE,
-  _INV_TABLE
+  __ADD_TABLE,
+  __ADD_CROSSED_TABLE,
+  __ADD_INVERTED_TABLE,
+  __SUB_TABLE,
+  __SUB_EPOCH_TABLE,
+  __SUB_CROSSED_TABLE,
+  __SUB_CROSSED_EPOCH_TABLE,
+  __SUB_INVERTED_TABLE,
+  __SUB_INVERTED_EPOCH_TABLE,
+  __MUL_TABLE,
+  __DIV_TABLE,
+  __INV_TABLE
 };
 
 // The environment struct will be defined here.  We should use the PEnv type, everywhere.
