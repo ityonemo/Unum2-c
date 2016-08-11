@@ -42,6 +42,6 @@ bool ispositive(const PBound *v){
 
 void collapseifsingle(PBound *v){
   if ((v->state == STDBOUND) && (v->upper == v->lower)){
-    v->state == SINGLETON;
+    v->state = SINGLETON;
   };
 }

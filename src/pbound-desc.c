@@ -11,16 +11,12 @@ void describe(PBound *value){
       printf("all real numbers\n");
     break;
     case SINGLETON:
-      printf("singleton: %i\n", bits(value->lower));
+      printf("singleton: 0x%016llx\n", value->lower);
     break;
     case STDBOUND:
-      printf("bound: %i, %i\n", bits(value->lower), bits(value->upper));
+      printf("bound: 0x%016llx, 0x%016llx\n", value->lower, value->upper);
     break;
     default:
       printf("unrecognized PBound state: %i\n", value->state);
   }
-}
-
-int bits(PFloat v){
-  return 0;
 }

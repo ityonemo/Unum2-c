@@ -4,6 +4,17 @@
 #ifndef __PBOUND_H
 #define __PBOUND_H
 
+#define TRACKME
+
+//temporary, for debugging purposes
+#ifdef TRACKME
+  #define TRACK(v) printf(v"\n");
+  #include <stdio.h>
+#else
+  #define TRACK(v)
+#endif
+
+
 #include <stdbool.h>
 #include "pfloat.h"
 
@@ -73,5 +84,11 @@ void div(PBound *dest, const PBound *lhs, const PBound *rhs);
 
 //NB:  THIS INTERFACE MAY CHANGE.
 void describe(PBound *value);
+
+////////////////////////////////////////////////////////////////////////////////
+// special DEFINES
+#define __EMPTYBOUND {__zero, __zero, EMPTYSET}
+#define println(v) printf(v"\n");
+#define hexprint(v) printf("0x%016llX\n", v);
 
 #endif

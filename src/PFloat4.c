@@ -46,8 +46,11 @@ const unsigned long long __PFloat4_division_table[1] = {
 
 const unsigned long long __PFloat4_inversion_table[1] = {0x0000000000000002};
 
-const unsigned long long *__PFloat4_TABLES[] = {
-  __PFloat4_addition_table,
+PEnv PFloat4_ENV = {
+  2,
+  1,
+  0x1000000000000000,
+  {__PFloat4_addition_table,
   __PFloat4_inverted_addition_table,
   __PFloat4_crossed_addition_table,
   __PFloat4_subtraction_table,
@@ -58,11 +61,5 @@ const unsigned long long *__PFloat4_TABLES[] = {
   __PFloat4_crossed_subtraction_epoch_table,
   __PFloat4_multiplication_table,
   __PFloat4_division_table,
-  __PFloat4_inversion_table};
-
-PEnv PFloat4_ENV = {
-  2,
-  1,
-  0x1000000000000000,
-  __PFloat4_TABLES,
+  __PFloat4_inversion_table},
 };
