@@ -162,6 +162,7 @@ PFloat pf_inexact_mul_inner(PFloat lhs, PFloat rhs){
   //create a temporary PBound to hold the prospective value.
   PBound res_temp = __EMPTYBOUND;
   pf_exact_mul(&res_temp, _inner_lhs, _inner_rhs);
+
   if (issingle(&res_temp)) {return res_temp.lower;};
   return is_pf_negative(res_temp.lower) ? res_temp.upper : res_temp.lower;
 }
