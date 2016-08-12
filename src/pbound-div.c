@@ -3,6 +3,14 @@
 #include "../include/pfloat.h"
 #include <stdio.h>
 
+void div(PBound *dest, const PBound *lhs, const PBound *rhs){
+  //allocate on the stack the rhs value, invert it, then multiply.
+  PBound r_inv = __EMPTYBOUND;
+  pcopy(&r_inv, rhs);
+  multiplicativeinverse(&r_inv);
+  mul(dest, lhs, &r_inv);
+}
+
 int muldiv_index(long long lhs_lattice, long long rhs_lattice);
 
 bool __is_lattice_ulp(int lu){ return ((lu % 2) == 1);}

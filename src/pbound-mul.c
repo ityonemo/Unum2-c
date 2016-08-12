@@ -12,7 +12,7 @@ void mul_pf_single(PBound *dest, PFloat lhs, PFloat rhs);
 void mul_lower(PBound *dest, PFloat lhs, PFloat rhs);
 void mul_upper(PBound *dest, PFloat lhs, PFloat rhs);
 
-extern void exact_arithmetic_division(PBound *dest, PFloat lhs, PFloat rhs);
+void exact_arithmetic_division(PBound *dest, PFloat lhs, PFloat rhs);
 void pf_exact_mul(PBound *dest, PFloat lhs, PFloat rhs);
 void pf_inexact_mul(PBound *dest, PFloat lhs, PFloat rhs);
 
