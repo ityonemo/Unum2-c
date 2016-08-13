@@ -198,7 +198,7 @@ int muldiv_index(long long lattice1, long long lattice2){
   int lpoint1 = ((lattice1 >> 1) - 1);
   int lpoint2 = ((lattice2 >> 1) - 1);
   //shift the left value index by the number of lattice bits.
-  return (lpoint1 << PENV->latticebits) + lpoint2;
+  return (lpoint1 << (PENV->latticebits - 1)) + lpoint2;
 }
 
 //for now, let's make this output single.
