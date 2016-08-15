@@ -27,7 +27,8 @@ _OBJ = PFloat4.o pbound-cmp.o pbound-desc.o pbound-gen.o pbound-prop.o pbound-in
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 _TEST = pfloat-test.o PFloat4-test.o PFloat4-paritytests.o PFloat4-inversetests.o \
-        PFloat4-itertests.o PFloat4-synthtests.o PFloat4-multest.o PFloat4-addtest.o
+        PFloat4-itertests.o PFloat4-synthtests.o PFloat4-multest.o PFloat4-addtest.o \
+				PFloat4-boundmathtests.o
 
 TEST = $(patsubst %,$(TDIR)/%,$(_TEST))
 

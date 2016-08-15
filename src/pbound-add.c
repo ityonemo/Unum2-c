@@ -29,7 +29,20 @@ void add(PBound *dest, const PBound *lhs, const PBound *rhs){
   pf_add(&temp, lhs->lower, rhs->lower);
   dest->lower = temp.lower;
   pf_add(&temp, lhs_upper_proxy, rhs_upper_proxy);
-  dest->upper = temp.upper;
+  dest->upper = issingle(&temp) ? temp.lower : temp.upper;
+
+  if (roundsinf(lhs) || roundsinf(rhs)){
+    // let's make sure our result still rounds inf, this is a property which is
+    // invariant under addition.  Losing this property suggests that the answer
+    // should be recast as "allreals."  While we're at it, check to see if the
+    // answer ends now "touch", which makes them "allreals".
+    if (__s(dest->lower) <= __s(dest->upper)) {
+      set_allreals(dest);
+    } else if (next(dest->upper) == dest->lower) {
+      set_allreals(dest);
+    }
+  }
+
   collapseifsingle(dest);
 }
 
