@@ -113,6 +113,8 @@ void single_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
       }
       return;
     }
+
+
     //need to figure out some parity things here.
     //mul_pf_single(dest, lhs->lower, rhs->lower, LOWER);
     //mul_pf_single(dest, rhs->lower, rhs->upper, UPPER);
@@ -266,24 +268,139 @@ void exact_arithmetic_multiplication(PBound *dest, PFloat lhs, PFloat rhs){
   return;
 }
 
-void inf_mul(PBound *dest, const PBound *lhs, const PBound *rhs){};
-void zero_mul(PBound *dest, const PBound *lhs, const PBound *rhs){};
+void inf_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
+{
+  TRACK("entering inf_mul...")
 
-void mul_single(PBound *dest, PFloat lhs, PFloat rhs){};
+  if (roundszero(rhs) || is_pf_zero(rhs->lower) || is_pf_zero(rhs->upper)) {
+    //the case where the right hand side hits zero:
+    set_allreals(dest);
+    return;
+  } else if (roundszero(lhs)) {
+    //the case where the lhs value rounds both infinity and zero.
+    //the value for rhs must be a nonflipped doubel interval on one side of zero.
+
+    if (roundsinf(rhs)) {set_allreals(dest); return;}
+
+    int _state = isnegative(lhs) * 1 + isnegative(rhs) * 2;
+
+    PFloat _l, _u;
+
+    // canonical examples:
+    // (100, 1) * (3, 4)     -> (300, 4)    (l * l, u * u)
+    // (100, 1) * (-4, -3)   -> (-4, -300)  (u * l, l * u)
+    // (-1, -100) * (3, 4)   -> (-4, -300)  (l * u, u * l)
+    // (-1, -100) * (-4, -3) -> (300, 4)    (u * u, l * l)
+
+    dest->state = STDBOUND;
+
+    //assign upper and lower values based on the bounds
+    switch (_state){
+      case 0:
+        mul_lower(dest, lhs->lower, rhs->lower);
+        mul_upper(dest, lhs->upper, rhs->upper);
+      break;
+      case 1:
+        mul_lower(dest, lhs->upper, rhs->lower);
+        mul_upper(dest, lhs->lower, rhs->upper);
+      break;
+      case 2:
+        mul_lower(dest, lhs->upper, rhs->lower);
+        mul_upper(dest, lhs->lower, rhs->upper);
+      break;
+      case 3: // state == 3.
+        mul_lower(dest, lhs->upper, rhs->upper);
+        mul_upper(dest, lhs->lower, rhs->lower);
+      break;
+    }
+
+    if (__s(dest->lower) <= __s(dest->upper)) {
+      set_allreals(dest); return;
+    } else if (next(dest->upper) == dest->lower) {
+      set_allreals(dest); return;
+    }
+
+  } else if (roundsinf(rhs)) {
+    // now we must check if y rounds infinity.
+    // like the double "rounds zero" case, we have to check four possible endpoints.
+    // unlinke the "rounds zero" case, the lower ones are positive valued, so that's not "crossed"
+
+    PBound temp1 = __EMPTYBOUND;
+    PBound temp2 = __EMPTYBOUND;
+
+    mul_lower(&temp1, lhs->lower, rhs->lower);
+    mul_lower(&temp2, lhs->upper, rhs->upper);
+    mul_upper(&temp1, lhs->lower, rhs->upper);
+    mul_upper(&temp2, lhs->upper, rhs->lower);
+
+    dest->state = STDBOUND;
+
+    dest->lower = __s(temp1.lower) < __s(temp2.lower) ? temp1.lower : temp2.lower;
+    dest->upper = __s(temp1.upper) < __s(temp2.upper) ? temp1.upper : temp2.upper;
+
+  } else {
+    //the last case is if x rounds infinity but y is a "well-behaved" value.
+
+    //canonical example:
+    // (2, -3) * (5, 7) -> (10, -15)
+    // (2, -3) * (-7, -5) -> (15, -10)
+
+    if (isnegative(rhs)) {
+      dest->state = STDBOUND;
+      mul_lower(dest, lhs->upper, rhs->upper);
+      mul_upper(dest, lhs->lower, rhs->upper);
+    } else {
+      dest->state = STDBOUND;
+      mul_lower(dest, lhs->lower, rhs->lower);
+      mul_upper(dest, lhs->upper, rhs->upper);
+    }
+  }
+};
+
+void zero_mul(PBound *dest, const PBound *lhs, const PBound *rhs){
+
+  TRACK("entering zero_mul...")
+
+  if (roundszero(rhs)){
+    PBound temp1 = __EMPTYBOUND;
+    PBound temp2 = __EMPTYBOUND;
+
+    mul_lower(&temp1, lhs->lower, rhs->lower);
+    mul_lower(&temp2, lhs->upper, rhs->upper);
+    mul_upper(&temp1, lhs->lower, rhs->upper);
+    mul_upper(&temp2, lhs->upper, rhs->lower);
+
+    dest->lower = __s(temp1.lower) < __s(temp2.lower) ? temp1.lower : temp2.lower;
+    dest->upper = __s(temp1.upper) < __s(temp2.upper) ? temp1.upper : temp2.upper;
+  } else if (ispositive(rhs)) {
+    mul_lower(dest, lhs->lower, rhs->upper);
+    mul_upper(dest, lhs->upper, rhs->upper);
+  } else { //#rhs must be negative
+    mul_lower(dest, lhs->upper, rhs->lower);
+    mul_upper(dest, lhs->lower, rhs->lower);
+  }
+};
 
 void mul_lower(PBound *dest, PFloat lhs, PFloat rhs){
+
   TRACK("entering mul_lower....")
+
   PBound temp;
   mul_pf_single(&temp, lhs, rhs);
   if (isallpreals(&temp)){
     set_allreals(dest);
   } else {
     dest->lower = temp.lower;
+
+    println("set dest lower:")
+    describe(dest);
   }
 };
 
 void mul_upper(PBound *dest, PFloat lhs, PFloat rhs){
+
   TRACK("entering mul_upper....")
+
   //bail if this problem is already solved.
   if (isallpreals(dest)) {return;}
 
@@ -293,5 +410,8 @@ void mul_upper(PBound *dest, PFloat lhs, PFloat rhs){
     set_allreals(dest);
   } else {
     dest->upper = issingle(&temp) ? temp.lower : temp.upper;
+
+    println("set dest upper:")
+    describe(dest);
   }
 };

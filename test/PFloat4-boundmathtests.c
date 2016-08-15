@@ -192,28 +192,45 @@ void PFloat4_bound_math_tests(){
   PBound mul_5_res = {pf0001, pf0111, STDBOUND};
   checkmultiplication(&mul_5_lft, &mul_4_lft, &mul_5_res);
 
-  //5: do bounds behave with infinity-terminated intervals?
-  // equation to be tested:  (0.5 inf] * (0.5 2) == (0 inf
+  //6: do bounds behave with infinity-terminated intervals?
+  // equation to be tested:  (0.5 inf] * (0.5 2) == (0 inf]
   // julia:  @test (ooll → looo) * (ooll → olol) == (oool → looo)
   PBound mul_6_lft = {pf0011, pf1000, STDBOUND};
   PBound mul_6_res = {pf0001, pf1000, STDBOUND};
   checkmultiplication(&mul_6_lft, &mul_4_lft, &mul_6_res);
-  
-  /*
-#######################
-## MULTIPLICATION
-#(0.5 inf] * (0.5 2) == (0 inf]
-@test (ooll → looo) * (ooll → olol) == (oool → looo)
 
-#test basic multiplication on things that round zero
-#[-2 2] * (0 1/2) == (-1 1)
-@test (lolo → ollo) * ▾(oool) == (llol → ooll)
-#[-2 2) * (0 1] == [-2 2)
-@test (lolo → olol) * (oool → oloo) == (lolo → olol)
-#[-2 2) * [-1 0] == (-2 2]
-@test (lolo → olol) * (lloo → oooo) == (loll → ollo)
-#[-2 2) * inf == allreals
-@test (lolo → ollo) * ▾(looo) == ℝᵖ(PBound4)
+  //7: basic multiplication on something that rounds zero?
+  // equation to be tested:  [-2 2] * (0 1/2) == (-1 1)
+  // julia:  @test (lolo → ollo) * ▾(oool) == (llol → ooll)
+  PBound mul_7_lft = {pf1010, pf0110, STDBOUND};
+  PBound mul_7_rgt = {pf0001, pf0000, SINGLETON};
+  PBound mul_7_res = {pf1101, pf0011, STDBOUND};
+  checkmultiplication(&mul_7_lft, &mul_7_rgt, &mul_7_res);
+
+  //8: basic multiplication on something that rounds zero?
+  // equation to be tested:  [-2 2) * (0 1] == [-2 2)
+  // julia:  @test (lolo → olol) * (oool → oloo) == (lolo → olol)
+  PBound mul_8_lft = {pf1010, pf0101, STDBOUND};
+  PBound mul_8_rgt = {pf0001, pf0100, STDBOUND};
+  PBound mul_8_res = {pf1010, pf0101, STDBOUND};
+  checkmultiplication(&mul_8_lft, &mul_8_rgt, &mul_8_res);
+
+  //9: basic multiplication on something that rounds zero?
+  // equation to be tested:  [-2 2) * [-1 0] == [-2 2)
+  // julia:  @test (lolo → olol) * (lloo → oooo) == (loll → ollo)
+  PBound mul_9_rgt = {pf1100, pf0000, STDBOUND};
+  PBound mul_9_res = {pf1011, pf0110, STDBOUND};
+  checkmultiplication(&mul_8_lft, &mul_9_rgt, &mul_9_res);
+
+  //10: basic multiplication on something that rounds zero?
+  // equation to be tested: [-2 2) * inf == allreals
+  // julia:  @test (lolo → ollo) * ▾(looo) == ℝᵖ(PBound4)
+  PBound mul_10_lft = {pf1010, pf0110, STDBOUND};
+  PBound mul_10_rgt = {pf1000, pf0000, SINGLETON};
+  PBound mul_10_res = {pf0000, pf0000, ALLREALS};
+  checkmultiplication(&mul_10_lft, &mul_10_rgt, &mul_10_res);
+
+/*
 
 #test basic multiplication on things that round infinity.
 #[2 -2] * [1/2 2) == [1 -1]
