@@ -55,7 +55,7 @@ void PFloat4_paritytests(){
 
 //spot testing on some bounds properties.
 void PFloat4_boundtests(){
-  const __ngone = __inf & __one;
+  const unsigned long long __ngone = __inf & __one;
   PBound testsubject = {__zero, __zero, EMPTYSET};  //create a temporary holding value.
   /******************************************
     TEST roundsinf

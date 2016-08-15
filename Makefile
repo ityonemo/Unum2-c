@@ -20,7 +20,7 @@ DEPS = $(IDEPS) $(HDEPS)
 _TDEPS = PFloat4-test.h
 TDEPS = $(patsubst %,$(TDIR)/%,$(_TDEPS))
 #general objects
-_OBJ = PFloat4.o pbound-cmp.o pbound-desc.o pbound-gen.o pbound-prop.o pbound-inv.o \
+_OBJ = pbound-cmp.o pbound-desc.o pbound-gen.o pbound-prop.o pbound-inv.o \
        pbound-mul.o pbound-div.o pbound-add.o pbound-sub.o penv.o pfloat-iter.o \
 			 pfloat-prop.o pfloat-math-inv.o pfloat-synth.o
 

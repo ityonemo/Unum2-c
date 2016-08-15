@@ -1,6 +1,7 @@
 
 #include "PFloat4-test.h"
-#include "../src/PFloat4.h"
+
+extern PEnv PFloat4_ENV;
 
 const PFloat pf0000 = __p(0x0000000000000000);
 const PFloat pf0001 = __p(0x1000000000000000);
@@ -37,5 +38,5 @@ const PBound pb1110 = {__p(0xE000000000000000), __zero, SINGLETON};
 const PBound pb1111 = {__p(0xF000000000000000), __zero, SINGLETON};
 
 void set_PFloat4(){
-  PENV = &PFloat4_ENV;
+  PENV = (PEnv *)(&PFloat4_ENV);
 }

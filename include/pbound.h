@@ -80,6 +80,20 @@ void sub(PBound *dest, const PBound *lhs, const PBound *rhs);
 void mul(PBound *dest, const PBound *lhs, const PBound *rhs);
 void div(PBound *dest, const PBound *lhs, const PBound *rhs);
 
+// Arithmetic helper functions
+
+/* pbound-add.c: */
+int addsub_index(long long lhs_lattice, long long rhs_lattice);
+/* pbound-div.c: */
+bool __is_lattice_ulp(int lu);
+void exact_arithmetic_division(PBound *dest, PFloat lhs, PFloat rhs);
+unsigned long long invert(unsigned long long value);
+/* pbound-mul.c: */
+int muldiv_index(long long lhs_lattice, long long rhs_lattice);
+/* pbound-sub.c: */
+void exact_arithmetic_subtraction(PBound *dest, PFloat lhs, PFloat rhs);
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // DESCRIPTIVE functions
 
