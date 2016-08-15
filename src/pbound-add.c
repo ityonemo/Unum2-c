@@ -10,7 +10,7 @@ void exact_arithmetic_addition(PBound *dest, PFloat lhs, PFloat rhs);
 
 
 void add(PBound *dest, const PBound *lhs, const PBound *rhs){
-  TRACK("entering add...")
+  TRACK("entering add...");
 
   /*first handle all the corner cases*/
   if (isempty(lhs) || isempty(rhs)) {set_empty(dest); return;}
@@ -47,7 +47,7 @@ void add(PBound *dest, const PBound *lhs, const PBound *rhs){
 }
 
 void pf_add(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering pf_add...")
+  TRACK("entering pf_add...");
 
   if (is_pf_inf(lhs)) {set_inf(dest); return;}
   if (is_pf_inf(rhs)) {set_inf(dest); return;}
@@ -62,7 +62,7 @@ void pf_add(PBound *dest, PFloat lhs, PFloat rhs){
 }
 
 void pf_inexact_add(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering pf_inexact_add...")
+  TRACK("entering pf_inexact_add...");
 
   PBound temp = __EMPTYBOUND;
   pf_exact_add(&temp, glb(lhs), glb(rhs));
@@ -76,7 +76,7 @@ void pf_inexact_add(PBound *dest, PFloat lhs, PFloat rhs){
 void exact_arithmetic_subtraction(PBound *dest, PFloat lhs, PFloat rhs);
 
 void pf_exact_add(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering pf_exact_add...")
+  TRACK("entering pf_exact_add...");
 
   //redo the checks on this in case we've been passed from inexact_add.
   if (is_pf_inf(lhs)) {set_inf(dest); return;}
@@ -105,7 +105,7 @@ void exact_arithmetic_addition_inverted(PBound * dest, PFloat lhs, PFloat rhs);
 void exact_arithmetic_addition_crossed(PBound * dest, PFloat lhs, PFloat rhs);
 
 void exact_arithmetic_addition(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering exact_arithmetic_addition...")
+  TRACK("entering exact_arithmetic_addition...");
 
   //swap the order of the two terms to make sure that the outer float appears
   //first.
@@ -125,7 +125,7 @@ void exact_arithmetic_addition(PBound *dest, PFloat lhs, PFloat rhs){
 
 void exact_arithmetic_addition_crossed(PBound *dest, PFloat lhs, PFloat rhs){
 
-  TRACK("entering exact_arithmetic_addition_crossed...")
+  TRACK("entering exact_arithmetic_addition_crossed...");
 
   int res_epoch = pf_epoch(lhs);
   unsigned long long res_lattice;
@@ -145,7 +145,7 @@ void exact_arithmetic_addition_crossed(PBound *dest, PFloat lhs, PFloat rhs){
 
 void exact_arithmetic_addition_inverted(PBound *dest, PFloat lhs, PFloat rhs){
 
-  TRACK("entering exact_arithmetic_addition_inverted...")
+  TRACK("entering exact_arithmetic_addition_inverted...");
 
   int res_epoch = pf_epoch(lhs);
   unsigned long long res_lattice;
@@ -181,7 +181,7 @@ void exact_arithmetic_addition_inverted(PBound *dest, PFloat lhs, PFloat rhs){
 
 void exact_arithmetic_addition_uninverted(PBound *dest, PFloat lhs, PFloat rhs){
 
-  TRACK("entering exact_arithmetic_uninverted...")
+  TRACK("entering exact_arithmetic_uninverted...");
 
   int res_epoch = pf_epoch(lhs);
   unsigned long long res_lattice;

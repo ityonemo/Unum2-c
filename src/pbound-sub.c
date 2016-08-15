@@ -8,7 +8,7 @@ void exact_arithmetic_subtraction_crossed(PBound * dest, PFloat lhs, PFloat rhs)
 
 void exact_arithmetic_subtraction(PBound *dest, PFloat lhs, PFloat rhs){
 
-  TRACK("entering exact_arithmetic_subtraction...")
+  TRACK("entering exact_arithmetic_subtraction...");
 
   //check to see if they're equal.
   if (lhs == rhs) {set_zero(dest); return;}
@@ -37,7 +37,7 @@ unsigned long long invert(unsigned long long value);
 
 void exact_arithmetic_subtraction_uninverted(PBound * dest, PFloat lhs, PFloat rhs){
 
-  TRACK("entering exact_arithmetic_subtraction_uninverted...")
+  TRACK("entering exact_arithmetic_subtraction_uninverted...");
 
   bool res_sign = is_pf_negative(lhs);
   bool res_inverted = false;
@@ -76,7 +76,7 @@ void exact_arithmetic_subtraction_uninverted(PBound * dest, PFloat lhs, PFloat r
 
 void exact_arithmetic_subtraction_inverted(PBound * dest, PFloat lhs, PFloat rhs){
 
-  TRACK("entering exact_arithmetic_subtraction_inverted...")
+  TRACK("entering exact_arithmetic_subtraction_inverted...");
 
   bool res_sign = is_pf_negative(lhs);
   long long res_epoch;
@@ -99,7 +99,7 @@ void exact_arithmetic_subtraction_inverted(PBound * dest, PFloat lhs, PFloat rhs
 
 void exact_arithmetic_subtraction_crossed(PBound *dest, PFloat lhs, PFloat rhs){
 
-  TRACK("entering exact_arithmetic_subtraction_crossed...")
+  TRACK("entering exact_arithmetic_subtraction_crossed...");
 
   bool res_sign = is_pf_negative(lhs);
   bool res_inverted = false;

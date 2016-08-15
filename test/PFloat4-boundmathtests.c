@@ -25,13 +25,13 @@ void checkmultiplication(PBound *a, PBound *b, PBound *res){
   PBound mul_res = __EMPTYBOUND;
   mul(&mul_res, a, b);
 
-  println("----")
-  println("inputs:")
+  println("----");
+  println("inputs:");
   describe(a);
   describe(b);
-  println("calculated:")
+  println("calculated:");
   describe(&mul_res);
-  println("expected:")
+  println("expected:");
   describe(res);
 
   assert(eq(res, &mul_res));
@@ -153,7 +153,7 @@ void PFloat4_bound_math_tests(){
   /* PART 2:                 */
   /* actual multiplication   */
 
-  println("====")
+  println("====");
 
   //1: general multiplication with easy bounds.
   // equation to be tested:  (0.5 1] * (0.5 1] == (0 1]

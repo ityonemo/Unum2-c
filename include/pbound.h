@@ -8,8 +8,9 @@
 
 //temporary, for debugging purposes
 #ifdef TRACKME
-  #define TRACK(v) printf(v"\n");
   #include <stdio.h>
+  #define TRACK(v, ...) \
+    do { printf(v"\n", ##__VA_ARGS__); } while (0)
 #else
   #define TRACK(v)
 #endif
@@ -88,7 +89,8 @@ void describe(PBound *value);
 ////////////////////////////////////////////////////////////////////////////////
 // special DEFINES
 #define __EMPTYBOUND {__zero, __zero, EMPTYSET}
-#define println(v) printf(v"\n");
-#define hexprint(v) printf("0x%016llX\n", v);
+#define println(v, ...) \
+  do { printf(v"\n", ##__VA_ARGS__); } while (0)
+#define hexprint(v) println("0x%016llX", v)
 
 #endif
