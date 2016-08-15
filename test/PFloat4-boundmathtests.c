@@ -162,25 +162,46 @@ void PFloat4_bound_math_tests(){
   PBound mul_1_res = {pf0001, pf0100, STDBOUND};
   checkmultiplication(&mul_1_lft, &mul_1_lft, &mul_1_res);
 
-/*
+  //2: flipping the sign.
+  // equation to be tested:  (0.5 1] * [-1 0.5) == [-1 0)
+  // julia:  @test (ooll → oloo) * (oloo → olol) == (lloo → llll)
+  PBound mul_2_rgt = {pf1100, pf1101, STDBOUND};
+  PBound mul_2_res = {pf1100, pf1111, STDBOUND};
+  checkmultiplication(&mul_1_lft, &mul_2_rgt, &mul_2_res);
 
+  //3: bound endpoint annihilation
+  // equation to be tested:  (0.5 2) * [0.5 1] == (0 2)
+  // julia:  @test (ooll → olol) * (oolo → oloo) == (oool → olol)
+  PBound mul_3_lft = {pf0011, pf0101, STDBOUND};
+  PBound mul_3_rgt = {pf0010, pf0100, STDBOUND};
+  PBound mul_3_res = {pf0001, pf0101, STDBOUND};
+  checkmultiplication(&mul_3_lft, &mul_3_rgt, &mul_3_res);
+
+  //4: more bound endpoint annihilation
+  // equation to be tested:  (0.5 2) * [0 0.5] == [0 1)
+  // julia:  @test (oool → ollo) * (oooo → oool) == (oooo → ooll)
+  PBound mul_4_lft = {pf0001, pf0110, STDBOUND};
+  PBound mul_4_rgt = {pf0000, pf0001, STDBOUND};
+  PBound mul_4_res = {pf0000, pf0011, STDBOUND};
+  checkmultiplication(&mul_4_lft, &mul_4_rgt, &mul_4_res);
+
+  //5: do bounds behave with unbounded open intervals?
+  // equation to be tested:  (0.5 inf) * (0.5 2) == (0 inf
+  // julia:  @test (ooll → olll) * (ooll → olol) == (oool → olll)
+  PBound mul_5_lft = {pf0011, pf0111, STDBOUND};
+  PBound mul_5_res = {pf0001, pf0111, STDBOUND};
+  checkmultiplication(&mul_5_lft, &mul_4_lft, &mul_5_res);
+
+  //5: do bounds behave with infinity-terminated intervals?
+  // equation to be tested:  (0.5 inf] * (0.5 2) == (0 inf
+  // julia:  @test (ooll → looo) * (ooll → olol) == (oool → looo)
+  PBound mul_6_lft = {pf0011, pf1000, STDBOUND};
+  PBound mul_6_res = {pf0001, pf1000, STDBOUND};
+  checkmultiplication(&mul_6_lft, &mul_4_lft, &mul_6_res);
+  
+  /*
 #######################
 ## MULTIPLICATION
-
-#make sure that multiplicative inverses work.
-
-#test basic multiplication on bounds
-#(0.5 1] * (0.5 1] == (0 1]
-@test (ooll → oloo) * (ooll → oloo) == (oool → oloo)
-#(0.5 1] * -((0.5 1]) == [1 0)
-@test (ooll → oloo) * (-(ooll → oloo)) == (lloo → llll)
-#bound endpoint annihilation.
-#(0.5 2) * [0.5 1] == (0 2)
-@test (ooll → olol) * (oolo → oloo) == (oool → olol)
-#(0.5 2) * [0 0.5] == [0 1)
-@test (oool → ollo) * (oooo → oool) == (oooo → ooll)
-#(0.5 inf) * (0.5 2) == (0 inf)
-@test (ooll → olll) * (ooll → olol) == (oool → olll)
 #(0.5 inf] * (0.5 2) == (0 inf]
 @test (ooll → looo) * (ooll → olol) == (oool → looo)
 

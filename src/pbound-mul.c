@@ -21,26 +21,66 @@ void mul(PBound *dest, const PBound *lhs, const PBound *rhs){
   TRACK("entering mul...")
   /*first handle all the corner cases*/
 
+  println("a")
+
   if (isempty(lhs) || isempty(rhs)) {set_empty(dest); return;}
   if (isallpreals(lhs) || isallpreals(rhs)) {set_allreals(dest); return;}
+
+  println("b")
 
   if (issingle(lhs)) {single_mul(dest, lhs, rhs); return;}
   if (issingle(rhs)) {single_mul(dest, rhs, lhs); return;}
 
+  println("c")
+
   if (roundsinf(lhs)) {inf_mul(dest, lhs, rhs); return;}
   if (roundsinf(rhs)) {inf_mul(dest, rhs, lhs); return;}
+
+  println("d")
 
   if (roundszero(lhs)) {zero_mul(dest, lhs, rhs); return;}
   if (roundszero(rhs)) {zero_mul(dest, rhs, lhs); return;}
 
-  /*handle the base case of two well-ordered bounds*/
-  bool flip_sign = is_pf_negative(lhs->lower) ^ is_pf_negative(rhs->lower);
+  println("e")
+
+  /*handle the case of bounds which stick to their parity*/
+
+  bool lhs_neg = isnegative(lhs);
+  bool rhs_neg = isnegative(rhs);
+
+  PFloat lhs_lower_proxy = lhs_neg ? pf_additiveinverse(lhs->upper) : lhs->lower;
+  PFloat lhs_upper_proxy = lhs_neg ? pf_additiveinverse(lhs->lower) : lhs->upper;
+  PFloat rhs_lower_proxy = rhs_neg ? pf_additiveinverse(rhs->upper) : rhs->lower;
+  PFloat rhs_upper_proxy = rhs_neg ? pf_additiveinverse(rhs->lower) : rhs->upper;
+
+  //presume our result is going to be a beautiful standard bound (may have to collapse.)
+  dest->state = STDBOUND;
+
+  println("lower input values")
+  hexprint(lhs_lower_proxy)
+  hexprint(lhs_upper_proxy)
+
+  println("upper input values")
+  hexprint(rhs_lower_proxy)
+  hexprint(rhs_upper_proxy)
 
   //calculate the lower side.
-  mul_lower(dest, lhs->lower, rhs->lower);
-  mul_upper(dest, lhs->upper, rhs->upper);
+  mul_lower(dest, lhs_lower_proxy, rhs_lower_proxy);
 
-  if (flip_sign) {additiveinverse(dest);};
+  println("lower partial")
+  describe(dest);
+
+  //calculate the upper side
+  mul_upper(dest, lhs_upper_proxy, rhs_upper_proxy);
+  println("upper partial")
+  describe(dest);
+
+  if (lhs_neg ^ rhs_neg) {additiveinverse(dest);};
+  println("flipped:")
+  describe(dest);
+
+  //collapse it if we must.
+  collapseifsingle(dest);
 
   return;
 }
@@ -231,5 +271,27 @@ void zero_mul(PBound *dest, const PBound *lhs, const PBound *rhs){};
 
 void mul_single(PBound *dest, PFloat lhs, PFloat rhs){};
 
-void mul_lower(PBound *dest, PFloat lhs, PFloat rhs){};
-void mul_upper(PBound *dest, PFloat lhs, PFloat rhs){};
+void mul_lower(PBound *dest, PFloat lhs, PFloat rhs){
+  TRACK("entering mul_lower....")
+  PBound temp;
+  mul_pf_single(&temp, lhs, rhs);
+  if (isallpreals(&temp)){
+    set_allreals(dest);
+  } else {
+    dest->lower = temp.lower;
+  }
+};
+
+void mul_upper(PBound *dest, PFloat lhs, PFloat rhs){
+  TRACK("entering mul_upper....")
+  //bail if this problem is already solved.
+  if (isallpreals(dest)) {return;}
+
+  PBound temp;
+  mul_pf_single(&temp, lhs, rhs);
+  if (isallpreals(&temp)){
+    set_allreals(dest);
+  } else {
+    dest->upper = issingle(&temp) ? temp.lower : temp.upper;
+  }
+};
