@@ -11,8 +11,6 @@ void div(PBound *dest, const PBound *lhs, const PBound *rhs){
   mul(dest, lhs, &r_inv);
 }
 
-int muldiv_index(long long lhs_lattice, long long rhs_lattice);
-
 bool __is_lattice_ulp(int lu){ return ((lu % 2) == 1);}
 
 unsigned long long invert(unsigned long long value){
@@ -62,3 +60,4 @@ void exact_arithmetic_division(PBound *dest, PFloat lhs, PFloat rhs)
   }
   return;
 };
+

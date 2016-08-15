@@ -16,14 +16,15 @@ bool eq(const PBound *lhs, const PBound *rhs){
     case ALLREALS:
       return (rhs->state == ALLREALS);
   }
-};
+}
 
 extern bool __roundsinf_checked(const PBound *);
 
 //////////////////////////////////////////////
 //TODO:  FINISH THESE PROCS
-bool lt(const PBound *lhs, const PBound *rhs);  //less than
-bool gt(const PBound *lhs, const PBound *rhs);  //greater than
+bool lt(const PBound *lhs, const PBound *rhs){return false;}  //less than
+bool gt(const PBound *lhs, const PBound *rhs){return false;}  //greater than
+bool ol(const PBound *lhs, const PBound *rhs){return false;}  //lhs and rhs overlap
 
 
 bool in(const PBound *lhs, const PBound *rhs){
@@ -60,4 +61,3 @@ bool in(const PBound *lhs, const PBound *rhs){
   }
 }
 
-bool ol(const PBound *lhs, const PBound *rhs);  //lhs and rhs overlap
