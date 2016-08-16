@@ -9,7 +9,9 @@ ODIR = obj
 #test directory
 TDIR = test
 #flags for making executable
-CFLAGS = -I.
+CFLAGS = -I. -fPIC
+CC = cc $(CFLAGS)
+#flags for making a library
 
 #header files & dependency chain
 _IDEPS = pbound.h penv.h pfloat.h
@@ -41,6 +43,9 @@ $(TDIR)/%.o: $(TDIR)/%.c $(DEPS) $(TDEPS)
 test: clean $(OBJ) $(TEST) $(DEPS) $(TDEPS)
 	$(CC) -o pfloattest $(TEST) $(OBJ)
 	./pfloattest
+
+lib: clean $(OBJ)
+	cc -shared -Wl,-soname,libpfloat.so -o libpfloat.so $(OBJ)
 
 .PHONY: clean
 clean:
