@@ -36,10 +36,15 @@ PFloats
 =======
 
 Pfloats in this library are 64-bit integers.  They correspond to the binary forms
-described in the Gustafson spec, *left shifted*.  for example, the 4-bit unum
+described in the Gustafson spec, *left aligned*.  for example, the 4-bit unum
 value 2 (0b0110) is represented in this library as 0x6000000000000000.  This
-enables the library to take advantage of the innate cyclical nature of Z/(2^64)Z
-which is the signed integer type.
+enables the library to take advantage of the innate cyclical nature of ℤ/(2^64)ℤ
+which is the signed integer type.  Moreover, key constants, such as infinity, zero,
+one, and negative one, as well as masks for determining positivity, etc. are
+invariant across all PFloat types regardless of bitlength.
+
+NB:  The size of the PFloat may be changed in a future revision, e.g. to 32 bit
+integer.
 
 PBounds
 =======
