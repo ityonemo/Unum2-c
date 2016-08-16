@@ -1,11 +1,11 @@
 # Unum2-c
 
-A Type-2 Unum computational library.
+A Type-2 Unum (pfloat; "projective float") computational library.
 
 How to use:
 
 1.  Download the package or git clone from github.
-2.  make lib creates a shared library in libUnum2.so in the root directory.
+2.  make lib creates a shared library in libpfloat.so in the root directory.
 
 You'll want to define a Unum lattice schema, using the function
 ```
@@ -39,7 +39,7 @@ Pfloats in this library are 64-bit integers.  They correspond to the binary form
 described in the Gustafson spec, *left aligned*.  for example, the 4-bit unum
 value 2 (0b0110) is represented in this library as 0x6000000000000000.  This
 enables the library to take advantage of the innate cyclical nature of ℤ/(2^64)ℤ
-which is the signed integer type, as well as hardware signed integer comparison.  
+which is the signed integer type, as well as hardware signed integer comparison
 for ordering primitives.  Moreover, key constants, such as infinity, zero,
 one, and negative one, as well as masks for determining positivity, etc. are
 invariant across all PFloat types regardless of bitlength, simplifying status
