@@ -22,6 +22,16 @@ epoch in the floating point value.  pivot, is also currently unsupported, but sh
 represent a value greater than the lattice which is the factor whose powers determine
 the range of each epoch.
 
+Given the lattice, latticebits, epochbits, and pivot, the function will
+automatically fill out the lookup tables for the desired lattices, and return a
+pointer to the environment variable.  There is a global variable pointer PENV
+which should be assigned to this location, which when enabled will allow all of
+the mathematics occur in the desired Type 2 Unum environment.  You may switch
+environments later, but it is the responsibility of the programmer to keep
+track of which environment the Unum calculations should be run in; C will do
+*nothing* to stop you from using a Unum generated in one environment in another
+environment.
+
 PFloats
 =======
 
