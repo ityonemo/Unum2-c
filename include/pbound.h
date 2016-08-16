@@ -4,18 +4,6 @@
 #ifndef __PBOUND_H
 #define __PBOUND_H
 
-#define TRACKME
-
-//temporary, for debugging purposes
-#ifdef TRACKME
-  #include <stdio.h>
-  #define TRACK(v, ...) \
-    do { printf(v"\n", ##__VA_ARGS__); } while (0);
-#else
-  #define TRACK(v)
-#endif
-
-
 #include <stdbool.h>
 #include "pfloat.h"
 
@@ -103,8 +91,5 @@ void describe(PBound *value);
 ////////////////////////////////////////////////////////////////////////////////
 // special DEFINES
 #define __EMPTYBOUND {__zero, __zero, EMPTYSET}
-#define println(v, ...) \
-  do { printf(v"\n", ##__VA_ARGS__); } while (0);
-#define hexprint(v) println("0x%016llX", v)
 
 #endif

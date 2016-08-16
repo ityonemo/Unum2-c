@@ -24,16 +24,6 @@ void checkmultiplicativeinverse(PBound *a, PBound *b){
 void checkmultiplication(PBound *a, PBound *b, PBound *res){
   PBound mul_res = __EMPTYBOUND;
   mul(&mul_res, a, b);
-
-  println("----");
-  println("inputs:");
-  describe(a);
-  describe(b);
-  println("calculated:");
-  describe(&mul_res);
-  println("expected:");
-  describe(res);
-
   assert(eq(res, &mul_res));
 }
 
@@ -153,8 +143,6 @@ void PFloat4_bound_math_tests(){
   /* PART 2:                 */
   /* actual multiplication   */
 
-  println("====");
-
   //1: general multiplication with easy bounds.
   // equation to be tested:  (0.5 1] * (0.5 1] == (0 1]
   // julia:  @test (ooll → oloo) * (ooll → oloo) == (oool → oloo)
@@ -230,41 +218,104 @@ void PFloat4_bound_math_tests(){
   PBound mul_10_res = {pf0000, pf0000, ALLREALS};
   checkmultiplication(&mul_10_lft, &mul_10_rgt, &mul_10_res);
 
-/*
+  //11: basic multiplication on something that rounds infinity?
+  // equation to be tested: [2 -2] * [1/2 2) == [1 -1]
+  // julia:  @test (ollo → lolo) * (oolo → ooll) == (oloo → lloo)
+  PBound mul_11_lft = {pf0110, pf1010, STDBOUND};
+  PBound mul_11_rgt = {pf0010, pf0011, STDBOUND};
+  PBound mul_11_res = {pf0100, pf1100, STDBOUND};
+  checkmultiplication(&mul_11_lft, &mul_11_rgt, &mul_11_res);
 
-#test basic multiplication on things that round infinity.
-#[2 -2] * [1/2 2) == [1 -1]
-@test (ollo → lolo) * (oolo → ooll) == (oloo → lloo)
-#(2 -2] * [1/2 2) == (1 -1]
-@test (olll → lolo) * (oolo → ooll) == (olol → lloo)
-#(2 -2] * [-2 -1/2) == [1 -1)
-@test (olll → lolo) * (-(oolo → ooll)) == (oloo → loll)
-#(2 -2] * 0 == allreals
-@test (olll → lolo) * ▾(oooo) == ℝᵖ(PBound4)
-#[2 -2] * (0 1) == allreals
-@test (olll → lolo) * (oooo → ooll) == ℝᵖ(PBound4)
+  //12: rounding infinity, with bound annihilation.
+  // equation to be tested: (2 -2] * [1/2 2) == (1 -1]
+  // julia:  @test (olll → lolo) * (oolo → ooll) == (olol → lloo)
+  PBound mul_12_lft = {pf0111, pf1010, STDBOUND};
+  PBound mul_12_res = {pf0101, pf1100, STDBOUND};
+  checkmultiplication(&mul_12_lft, &mul_11_rgt, &mul_12_res);
 
-#bounds that round infinity and zero
-#[2 1/2] * [0] = allerals
-@test (ollo → oolo) * ▾(oooo) == ℝᵖ(PBound4)
-#[2 1/2] * [inf] = allerals
-@test (ollo → oolo) * ▾(looo) == ℝᵖ(PBound4)
-@test (ollo → oolo) * (oooo → oool) == ℝᵖ(PBound4)
-@test (ollo → oolo) * (olll → looo) == ℝᵖ(PBound4)
-@test (ollo → oolo) * (llll → oool) == ℝᵖ(PBound4)
-@test (ollo → oolo) * (olll → lool) == ℝᵖ(PBound4)
+  //13: rounding infinity, with bound status swapping because of sign changes.
+  // equation to be tested: (2 -2] * (-2 -1/2] == (1 -1)
+  // julia:  @test (olll → lolo) * (loll → lllo) == (oloo → loll)
+  PBound mul_13_rgt = {pf1011, pf1110, STDBOUND};
+  PBound mul_13_res = {pf0100, pf1011, STDBOUND};
+  checkmultiplication(&mul_12_lft, &mul_13_rgt, &mul_13_res);
 
-#(2 1/2) * [1/2, 2] == R\[1]
-@test (olll → oool) * (oolo → ollo) == (olol → ooll)
+  //14:  rounding infinity, times zero is allreals.
+  // equation to be tested: (2 -2] * [0] == allreals
+  // julia:  @test (olll → lolo) * ▾(oooo) == ℝᵖ(PBound4)
+  PBound mul_14_rgt = {pf0000, pf0000, SINGLETON};
+  checkmultiplication(&mul_12_lft, &mul_14_rgt, &mul_10_res);
 
-#wrap around to stitch together.
-#[2 1/2] * [1/2 2] == allreals
-@test (ollo → oolo) * (oolo → ollo) == ℝᵖ(PBound4)
-#[2 1/2] * [1/2 2) == allreals
-@test (ollo → oolo) * (oolo → olol) == ℝᵖ(PBound4)
-#[2 1/2) * [1/2 2) == allreals
-@test (ollo → oool) * (oolo → olol) == ℝᵖ(PBound4)
-#(2 1/2) * (1/2 2) == R\[1]
-@test (olol → oool) * (oolo → olol) == ℝᵖ(PBound4)
-*/
+  //15:  rounding infinity, times a zero-bounded interval is allreals.
+  // equation to be tested: (2 -2] * [0 1) == allreals
+  // julia:  @test (olll → lolo) * (oooo → ooll) == ℝᵖ(PBound4)
+  PBound mul_15_rgt = {pf0000, pf0011, STDBOUND};
+  checkmultiplication(&mul_12_lft, &mul_15_rgt, &mul_10_res);
+
+  //16:  Bounds that rounding infinity and zero become allreals, by zero mult
+  // equation to be tested: [2 1/2] * [0] = allreals
+  // julia:  @test (ollo → oolo) * ▾(oooo) == ℝᵖ(PBound4)
+  PBound mul_16_lft = {pf0110, pf0010, STDBOUND};
+  checkmultiplication(&mul_16_lft, &mul_14_rgt, &mul_10_res);
+
+  //17:  Bounds that rounding infinity and zero become allreals, by inf mult
+  // equation to be tested: [2 1/2] * [inf] = allreals
+  // julia:  @test (ollo → oolo) * ▾(looo) == ℝᵖ(PBound4)
+  PBound mul_17_rgt = {pf1000, pf0000, SINGLETON};
+  checkmultiplication(&mul_16_lft, &mul_17_rgt, &mul_10_res);
+
+  //18:  Bounds that rounding infinity and zero become allreals, by edge zero mult
+  // equation to be tested: [2 1/2] * (0 1/2) = allreals
+  // julia:  @test (ollo → oolo) * (oooo → oool) == ℝᵖ(PBound4)
+  PBound mul_18_rgt = {pf0000, pf0001, STDBOUND};
+  checkmultiplication(&mul_16_lft, &mul_18_rgt, &mul_10_res);
+
+  //19:  Bounds that rounding infinity and zero become allreals, by inf mult
+  // equation to be tested: [2 1/2] * (0 1/2) = allreals
+  // julia:  @test (ollo → oolo) * (olll → looo) == ℝᵖ(PBound4)
+  PBound mul_19_rgt = {pf0111, pf1000, STDBOUND};
+  checkmultiplication(&mul_16_lft, &mul_19_rgt, &mul_10_res);
+
+  //20:  Bounds that rounding infinity and zero become allreals, by zero mult
+  // equation to be tested: [2 1/2] * (0 1/2) = allreals
+  // julia:  @test (ollo → oolo) * (llll → oool) == ℝᵖ(PBound4)
+  PBound mul_20_rgt = {pf1111, pf0001, STDBOUND};
+  checkmultiplication(&mul_16_lft, &mul_20_rgt, &mul_10_res);
+
+  //21:  Bounds that rounding infinity and zero become allreals, by inf mult
+  // equation to be tested: [2 1/2] * (0 1/2) = allreals
+  // julia:  @test (ollo → oolo) * (llll → oool) == ℝᵖ(PBound4)
+  PBound mul_21_rgt = {pf0111, pf1001, STDBOUND};
+  checkmultiplication(&mul_16_lft, &mul_21_rgt, &mul_10_res);
+
+  //22: Bound mult can exclude single exacts.
+  // equation to be tested: (2 1/2) * [1/2, 2] = R\[1]
+  // julia:  @test (olll → oool) * (oolo → ollo) == (olol → ooll)
+  PBound mul_22_lft = {pf0111, pf0001, STDBOUND};
+  PBound mul_22_rgt = {pf0010, pf0110, STDBOUND};
+  PBound mul_22_res = {pf0101, pf0011, STDBOUND};
+  checkmultiplication(&mul_22_lft, &mul_22_rgt, &mul_22_res);
+
+  //23: Wrap around to stitch together single exacts.
+  // equation to be tested: [2 1/2] * [1/2, 2] = allreals
+  // julia:  @test (ollo → oolo) * (oolo → ollo) == ℝᵖ(PBound4)
+  PBound mul_23_lft = {pf0110, pf0010, STDBOUND};
+  checkmultiplication(&mul_23_lft, &mul_22_rgt, &mul_10_res);
+
+  //24: Wrap around to stitch together single exacts.
+  // equation to be tested: [2 1/2] * [1/2, 2) = allreals
+  // julia:  @test (ollo → oolo) * (oolo → olol) == ℝᵖ(PBound4)
+  PBound mul_24_rgt = {pf0110, pf0101, STDBOUND};
+  checkmultiplication(&mul_23_lft, &mul_24_rgt, &mul_10_res);
+
+  //25: Wrap around to stitch together single exacts.
+  // equation to be tested: [2 1/2) * [1/2, 2) = allreals
+  // julia:  @test (ollo → oolo) * (oolo → olol) == ℝᵖ(PBound4)
+  checkmultiplication(&mul_22_lft, &mul_24_rgt, &mul_10_res);
+
+  //26: Wrap around to stitch together single exacts.
+  // equation to be tested: (2 1/2) * [1/2, 2) = allreals
+  // julia:  @test (olol → oolo) * (oolo → olol) == ℝᵖ(PBound4)
+  PBound mul_26_lft = {pf0101, pf0010, STDBOUND};
+  checkmultiplication(&mul_22_lft, &mul_24_rgt, &mul_10_res);
 }

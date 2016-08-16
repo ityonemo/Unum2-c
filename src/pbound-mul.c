@@ -34,7 +34,6 @@ void exact_arithmetic_multiplication(PBound *dest, PFloat lhs, PFloat rhs){
 
 
 static void pf_exact_mul(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering pf_exact_mul...");
   //this needs to be here to avoid parity tests causing strange results.
   if (is_pf_inf(lhs) || is_pf_inf(rhs)) {set_inf(dest); return;}
   if (is_pf_zero(lhs) || is_pf_zero(rhs)) {set_zero(dest); return;}
@@ -55,7 +54,6 @@ static void pf_exact_mul(PBound *dest, PFloat lhs, PFloat rhs){
 
 static PFloat pf_inexact_mul_outer(PFloat lhs, PFloat rhs){
 
-  TRACK("entering pf_inexact_mul_outer...");
   //calculate proper outer bounds.
   PFloat _outer_lhs = is_pf_positive(lhs) ? lub(lhs) : glb(lhs);
   PFloat _outer_rhs = is_pf_positive(rhs) ? lub(rhs) : glb(rhs);
@@ -68,7 +66,6 @@ static PFloat pf_inexact_mul_outer(PFloat lhs, PFloat rhs){
 }
 
 static PFloat pf_inexact_mul_inner(PFloat lhs, PFloat rhs){
-  TRACK("entering pf_inexact_mul_inner...");
 
   PFloat _inner_lhs = is_pf_positive(lhs) ? glb(lhs) : lub(lhs);
   PFloat _inner_rhs = is_pf_positive(rhs) ? glb(rhs) : lub(rhs);
@@ -82,15 +79,10 @@ static PFloat pf_inexact_mul_inner(PFloat lhs, PFloat rhs){
 }
 
 static PFloat pf_inexact_mul_lower(PFloat lhs, PFloat rhs){
-  TRACK("entering pf_inexact_mul_lower...");
-
   return upper_ulp(__resultparity(lhs, rhs) ? pf_inexact_mul_outer(lhs, rhs) : pf_inexact_mul_inner(lhs, rhs));
 }
 
 static PFloat pf_inexact_mul_upper(PFloat lhs, PFloat rhs){
-
-  TRACK("entering pf_inexact_mul_upper....");
-
   return lower_ulp(__resultparity(lhs, rhs) ? pf_inexact_mul_inner(lhs, rhs) : pf_inexact_mul_outer(lhs, rhs));
 }
 
@@ -98,9 +90,6 @@ static PFloat pf_inexact_mul_upper(PFloat lhs, PFloat rhs){
 // FULL inexact mult.
 
 static void pf_inexact_mul(PBound *dest, PFloat lhs, PFloat rhs){
-
-  TRACK("entering pf_inexact_mul...");
-
   PFloat _l = pf_inexact_mul_lower(lhs, rhs);
   PFloat _u = pf_inexact_mul_upper(lhs, rhs);
   set_bound(dest, _l, _u);
@@ -142,22 +131,16 @@ static void mul_pf_single(PBound *dest, PFloat lhs, PFloat rhs)
 }
 
 static void mul_lower(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering mul_lower....")
   PBound temp;
   mul_pf_single(&temp, lhs, rhs);
   if (isallpreals(&temp)){
     set_allreals(dest);
   } else {
     dest->lower = temp.lower;
-
-    println("set dest lower:")
-    describe(dest);
   }
 };
 
-static void mul_upper(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering mul_upper....");
-  //bail if this problem is already solved.
+static void mul_upper(PBound *dest, PFloat lhs, PFloat rhs){  //bail if this problem is already solved.
   if (isallpreals(dest)) {return;}
 
   PBound temp;
@@ -166,16 +149,11 @@ static void mul_upper(PBound *dest, PFloat lhs, PFloat rhs){
     set_allreals(dest);
   } else {
     dest->upper = issingle(&temp) ? temp.lower : temp.upper;
-
-    println("set dest upper:")
-    describe(dest);
   }
 };
 
 static void single_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
 {
-  TRACK("entering single_mul...");
-
   if (lhs->lower == __one) {pcopy(dest, rhs); return;}
   if (lhs->lower == (__one | __inf)) {pcopy(dest, rhs); additiveinverse(dest); return;}
 
@@ -222,10 +200,8 @@ int muldiv_index(long long lattice1, long long lattice2){
   return (lpoint1 << (PENV->latticebits - 1)) + lpoint2;
 }
 
-void inf_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
+static void inf_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
 {
-  TRACK("entering inf_mul...")
-
   if (roundszero(rhs) || is_pf_zero(rhs->lower) || is_pf_zero(rhs->upper)) {
     //the case where the right hand side hits zero:
     set_allreals(dest);
@@ -289,8 +265,8 @@ void inf_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
 
     dest->state = STDBOUND;
 
-    dest->lower = __s(temp1.lower) < __s(temp2.lower) ? temp1.lower : temp2.lower;
-    dest->upper = __s(temp1.upper) < __s(temp2.upper) ? temp1.upper : temp2.upper;
+    dest->lower = (__s(temp1.lower) < __s(temp2.lower)) ? temp1.lower : temp2.lower;
+    dest->upper = (__s(temp1.upper) < __s(temp2.upper)) ? temp2.upper : temp1.upper;
 
   } else {
     //the last case is if x rounds infinity but y is a "well-behaved" value.
@@ -306,14 +282,14 @@ void inf_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
     } else {
       dest->state = STDBOUND;
       mul_lower(dest, lhs->lower, rhs->lower);
-      mul_upper(dest, lhs->upper, rhs->upper);
+      mul_upper(dest, lhs->upper, rhs->lower);
     }
   }
 };
 
 static void zero_mul(PBound *dest, const PBound *lhs, const PBound *rhs){
 
-  TRACK("entering zero_mul...")
+  dest->state = STDBOUND;
 
   if (roundszero(rhs)){
     PBound temp1 = __EMPTYBOUND;
@@ -324,8 +300,9 @@ static void zero_mul(PBound *dest, const PBound *lhs, const PBound *rhs){
     mul_upper(&temp1, lhs->lower, rhs->upper);
     mul_upper(&temp2, lhs->upper, rhs->lower);
 
-    dest->lower = __s(temp1.lower) < __s(temp2.lower) ? temp1.lower : temp2.lower;
-    dest->upper = __s(temp1.upper) < __s(temp2.upper) ? temp1.upper : temp2.upper;
+    dest->lower = (__s(temp1.lower) < __s(temp2.lower)) ? temp1.lower : temp2.lower;
+    dest->upper = (__s(temp1.upper) < __s(temp2.upper)) ? temp2.upper : temp1.upper;
+
   } else if (ispositive(rhs)) {
     mul_lower(dest, lhs->lower, rhs->upper);
     mul_upper(dest, lhs->upper, rhs->upper);
@@ -337,30 +314,17 @@ static void zero_mul(PBound *dest, const PBound *lhs, const PBound *rhs){
 
 void mul(PBound *dest, const PBound *lhs, const PBound *rhs){
 
-  TRACK("entering mul...");
-  /*first handle all the corner cases*/
-
-  println("a");
-
   if (isempty(lhs) || isempty(rhs)) {set_empty(dest); return;}
   if (isallpreals(lhs) || isallpreals(rhs)) {set_allreals(dest); return;}
-
-  println("b");
 
   if (issingle(lhs)) {single_mul(dest, lhs, rhs); return;}
   if (issingle(rhs)) {single_mul(dest, rhs, lhs); return;}
 
-  println("c");
-
   if (roundsinf(lhs)) {inf_mul(dest, lhs, rhs); return;}
   if (roundsinf(rhs)) {inf_mul(dest, rhs, lhs); return;}
 
-  println("d");
-
   if (roundszero(lhs)) {zero_mul(dest, lhs, rhs); return;}
   if (roundszero(rhs)) {zero_mul(dest, rhs, lhs); return;}
-
-  println("e");
 
   /*handle the case of bounds which stick to their parity*/
 
@@ -375,28 +339,13 @@ void mul(PBound *dest, const PBound *lhs, const PBound *rhs){
   //presume our result is going to be a beautiful standard bound (may have to collapse.)
   dest->state = STDBOUND;
 
-  println("lower input values");
-  hexprint(lhs_lower_proxy);
-  hexprint(lhs_upper_proxy);
-
-  println("upper input values");
-  hexprint(rhs_lower_proxy);
-  hexprint(rhs_upper_proxy);
-
   //calculate the lower side.
   mul_lower(dest, lhs_lower_proxy, rhs_lower_proxy);
 
-  println("lower partial");
-  describe(dest);
-
   //calculate the upper side
   mul_upper(dest, lhs_upper_proxy, rhs_upper_proxy);
-  println("upper partial");
-  describe(dest);
 
   if (lhs_neg ^ rhs_neg) {additiveinverse(dest);};
-  println("flipped:");
-  describe(dest);
 
   //collapse it if we must.
   collapseifsingle(dest);

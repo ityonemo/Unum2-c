@@ -11,6 +11,7 @@ int main(){
   PFloat4_multest();
   PFloat4_addtest();
   PFloat4_bound_math_tests();
+  PFloat4_creationtest();
   printf("OK\n");
   return 0;
 }

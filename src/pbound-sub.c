@@ -2,10 +2,15 @@
 #include "../include/pbound.h"
 #include "../include/pfloat.h"
 
+void sub(PBound *dest, const PBound *lhs, const PBound *rhs){
+  //allocate on the stack the rhs value, invert it, then add.
+  PBound r_inv = __EMPTYBOUND;
+  pcopy(&r_inv, rhs);
+  additiveinverse(&r_inv);
+  sub(dest, lhs, &r_inv);
+}
+
 static void exact_arithmetic_subtraction_uninverted(PBound * dest, PFloat lhs, PFloat rhs){
-
-  TRACK("entering exact_arithmetic_subtraction_uninverted...");
-
   bool res_sign = is_pf_negative(lhs);
   bool res_inverted = false;
   long long res_epoch;
@@ -42,9 +47,6 @@ static void exact_arithmetic_subtraction_uninverted(PBound * dest, PFloat lhs, P
 }
 
 static void exact_arithmetic_subtraction_inverted(PBound * dest, PFloat lhs, PFloat rhs){
-
-  TRACK("entering exact_arithmetic_subtraction_inverted...");
-
   bool res_sign = is_pf_negative(lhs);
   long long res_epoch;
   long long rhs_epoch = pf_epoch(rhs);
@@ -65,9 +67,6 @@ static void exact_arithmetic_subtraction_inverted(PBound * dest, PFloat lhs, PFl
 }
 
 static void exact_arithmetic_subtraction_crossed(PBound *dest, PFloat lhs, PFloat rhs){
-
-  TRACK("entering exact_arithmetic_subtraction_crossed...");
-
   bool res_sign = is_pf_negative(lhs);
   bool res_inverted = false;
   long long res_epoch;
@@ -103,9 +102,6 @@ static void exact_arithmetic_subtraction_crossed(PBound *dest, PFloat lhs, PFloa
 }
 
 void exact_arithmetic_subtraction(PBound *dest, PFloat lhs, PFloat rhs){
-
-  TRACK("entering exact_arithmetic_subtraction...");
-
   //check to see if they're equal.
   if (lhs == rhs) {set_zero(dest); return;}
 
@@ -127,4 +123,3 @@ void exact_arithmetic_subtraction(PBound *dest, PFloat lhs, PFloat rhs){
 
   if (signswap) {additiveinverse(dest);}
 }
-

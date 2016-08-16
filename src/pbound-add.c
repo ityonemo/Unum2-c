@@ -13,8 +13,6 @@ int addsub_index(long long lhs_lattice, long long rhs_lattice){
 
 static void exact_arithmetic_addition_crossed(PBound *dest, PFloat lhs, PFloat rhs){
 
-  TRACK("entering exact_arithmetic_addition_crossed...");
-
   int res_epoch = pf_epoch(lhs);
   unsigned long long res_lattice;
   unsigned long long lhs_lattice = pf_lattice(lhs);
@@ -32,8 +30,6 @@ static void exact_arithmetic_addition_crossed(PBound *dest, PFloat lhs, PFloat r
 }
 
 static void exact_arithmetic_addition_inverted(PBound *dest, PFloat lhs, PFloat rhs){
-
-  TRACK("entering exact_arithmetic_addition_inverted...");
 
   int res_epoch = pf_epoch(lhs);
   unsigned long long res_lattice;
@@ -68,9 +64,6 @@ static void exact_arithmetic_addition_inverted(PBound *dest, PFloat lhs, PFloat 
 }
 
 static void exact_arithmetic_addition_uninverted(PBound *dest, PFloat lhs, PFloat rhs){
-
-  TRACK("entering exact_arithmetic_uninverted...");
-
   int res_epoch = pf_epoch(lhs);
   unsigned long long res_lattice;
   unsigned long long lhs_lattice = pf_lattice(lhs);
@@ -88,8 +81,6 @@ static void exact_arithmetic_addition_uninverted(PBound *dest, PFloat lhs, PFloa
 }
 
 static void exact_arithmetic_addition(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering exact_arithmetic_addition...");
-
   //swap the order of the two terms to make sure that the outer float appears
   //first.
   bool orderswap = is_pf_negative(lhs) ^ (__s(lhs) < __s(rhs));
@@ -107,8 +98,6 @@ static void exact_arithmetic_addition(PBound *dest, PFloat lhs, PFloat rhs){
 }
 
 static void pf_exact_add(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering pf_exact_add...");
-
   //redo the checks on this in case we've been passed from inexact_add.
   if (is_pf_inf(lhs)) {set_inf(dest); return;}
   if (is_pf_inf(rhs)) {set_inf(dest); return;}
@@ -123,8 +112,6 @@ static void pf_exact_add(PBound *dest, PFloat lhs, PFloat rhs){
 }
 
 static void pf_inexact_add(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering pf_inexact_add...");
-
   PBound temp = __EMPTYBOUND;
   pf_exact_add(&temp, glb(lhs), glb(rhs));
   PFloat _l = upper_ulp(temp.lower);
@@ -135,8 +122,6 @@ static void pf_inexact_add(PBound *dest, PFloat lhs, PFloat rhs){
 }
 
 static void pf_add(PBound *dest, PFloat lhs, PFloat rhs){
-  TRACK("entering pf_add...");
-
   if (is_pf_inf(lhs)) {set_inf(dest); return;}
   if (is_pf_inf(rhs)) {set_inf(dest); return;}
   if (is_pf_zero(lhs)) {set_single(dest, rhs); return;}
@@ -150,8 +135,6 @@ static void pf_add(PBound *dest, PFloat lhs, PFloat rhs){
 }
 
 void add(PBound *dest, const PBound *lhs, const PBound *rhs){
-  TRACK("entering add...");
-
   /*first handle all the corner cases*/
   if (isempty(lhs) || isempty(rhs)) {set_empty(dest); return;}
   if (isallpreals(lhs) || isallpreals(rhs)) {set_allreals(dest); return;}
@@ -185,4 +168,3 @@ void add(PBound *dest, const PBound *lhs, const PBound *rhs){
 
   collapseifsingle(dest);
 }
-
