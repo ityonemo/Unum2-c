@@ -1,6 +1,6 @@
-#include "PFloat4-test.h"
+#include "PTile4-test.h"
 
-void PFloat4_itertests(){
+void PTile4_itertests(){
   assert(next(pf1000) == pf1001);
   assert(next(pf1001) == pf1010);
   assert(next(pf1010) == pf1011);

@@ -1,30 +1,30 @@
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/pfloat.h"
+#include "../include/PTile.h"
 
-PFloat next(PFloat x){
+PTile next(PTile x){
   return __p(__u(x) + (PENV->increment));
 }
 
-PFloat prev(PFloat x){
+PTile prev(PTile x){
   return __p(__u(x) - (PENV->increment));
 }
 
 //glb:  Greatest Lower Bound
-PFloat glb(PFloat x){
+PTile glb(PTile x){
   return is_pf_ulp(x) ? prev(x) : x;
 }
 
 //lub:  Least Upper Bound
-PFloat lub(PFloat x){
+PTile lub(PTile x){
   return is_pf_ulp(x) ? next(x) : x;
 }
 
 
-PFloat upper_ulp(PFloat x){
+PTile upper_ulp(PTile x){
   return is_pf_ulp(x) ? x : next(x);
 }
 
-PFloat lower_ulp(PFloat x){
+PTile lower_ulp(PTile x){
   return is_pf_ulp(x) ? x : prev(x);
 }

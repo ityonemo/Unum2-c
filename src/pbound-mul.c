@@ -1,14 +1,14 @@
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/pfloat.h"
+#include "../include/PTile.h"
 #include <stdio.h>
 
-static bool __resultparity(PFloat lhs, PFloat rhs){
+static bool __resultparity(PTile lhs, PTile rhs){
   return is_pf_negative(lhs) ^ is_pf_negative(rhs);
 }
 
 //for now, let's make this output single.
-void exact_arithmetic_multiplication(PBound *dest, PFloat lhs, PFloat rhs){
+void exact_arithmetic_multiplication(PBound *dest, PTile lhs, PTile rhs){
 
   long long res_epoch = pf_epoch(lhs) + pf_epoch(rhs);
   unsigned long long lhs_lattice = pf_lattice(lhs);
@@ -33,7 +33,7 @@ void exact_arithmetic_multiplication(PBound *dest, PFloat lhs, PFloat rhs){
 }
 
 
-static void pf_exact_mul(PBound *dest, PFloat lhs, PFloat rhs){
+static void pf_exact_mul(PBound *dest, PTile lhs, PTile rhs){
   //this needs to be here to avoid parity tests causing strange results.
   if (is_pf_inf(lhs) || is_pf_inf(rhs)) {set_inf(dest); return;}
   if (is_pf_zero(lhs) || is_pf_zero(rhs)) {set_zero(dest); return;}
@@ -52,11 +52,11 @@ static void pf_exact_mul(PBound *dest, PFloat lhs, PFloat rhs){
 ///////////////////////////////////////////////////////////////////////////////
 // INNER, OUTER, UPPER, and LOWER inexact mults.
 
-static PFloat pf_inexact_mul_outer(PFloat lhs, PFloat rhs){
+static PTile pf_inexact_mul_outer(PTile lhs, PTile rhs){
 
   //calculate proper outer bounds.
-  PFloat _outer_lhs = is_pf_positive(lhs) ? lub(lhs) : glb(lhs);
-  PFloat _outer_rhs = is_pf_positive(rhs) ? lub(rhs) : glb(rhs);
+  PTile _outer_lhs = is_pf_positive(lhs) ? lub(lhs) : glb(lhs);
+  PTile _outer_rhs = is_pf_positive(rhs) ? lub(rhs) : glb(rhs);
 
   //create a temporary PBound to hold the prospective value.
   PBound res_temp = __EMPTYBOUND;
@@ -65,10 +65,10 @@ static PFloat pf_inexact_mul_outer(PFloat lhs, PFloat rhs){
   return is_pf_positive(res_temp.lower) ? res_temp.upper : res_temp.lower;
 }
 
-static PFloat pf_inexact_mul_inner(PFloat lhs, PFloat rhs){
+static PTile pf_inexact_mul_inner(PTile lhs, PTile rhs){
 
-  PFloat _inner_lhs = is_pf_positive(lhs) ? glb(lhs) : lub(lhs);
-  PFloat _inner_rhs = is_pf_positive(rhs) ? glb(rhs) : lub(rhs);
+  PTile _inner_lhs = is_pf_positive(lhs) ? glb(lhs) : lub(lhs);
+  PTile _inner_rhs = is_pf_positive(rhs) ? glb(rhs) : lub(rhs);
 
   //create a temporary PBound to hold the prospective value.
   PBound res_temp = __EMPTYBOUND;
@@ -78,24 +78,24 @@ static PFloat pf_inexact_mul_inner(PFloat lhs, PFloat rhs){
   return is_pf_negative(res_temp.lower) ? res_temp.upper : res_temp.lower;
 }
 
-static PFloat pf_inexact_mul_lower(PFloat lhs, PFloat rhs){
+static PTile pf_inexact_mul_lower(PTile lhs, PTile rhs){
   return upper_ulp(__resultparity(lhs, rhs) ? pf_inexact_mul_outer(lhs, rhs) : pf_inexact_mul_inner(lhs, rhs));
 }
 
-static PFloat pf_inexact_mul_upper(PFloat lhs, PFloat rhs){
+static PTile pf_inexact_mul_upper(PTile lhs, PTile rhs){
   return lower_ulp(__resultparity(lhs, rhs) ? pf_inexact_mul_inner(lhs, rhs) : pf_inexact_mul_outer(lhs, rhs));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // FULL inexact mult.
 
-static void pf_inexact_mul(PBound *dest, PFloat lhs, PFloat rhs){
-  PFloat _l = pf_inexact_mul_lower(lhs, rhs);
-  PFloat _u = pf_inexact_mul_upper(lhs, rhs);
+static void pf_inexact_mul(PBound *dest, PTile lhs, PTile rhs){
+  PTile _l = pf_inexact_mul_lower(lhs, rhs);
+  PTile _u = pf_inexact_mul_upper(lhs, rhs);
   set_bound(dest, _l, _u);
 }
 
-static void mul_pf_single(PBound *dest, PFloat lhs, PFloat rhs)
+static void mul_pf_single(PBound *dest, PTile lhs, PTile rhs)
 {
   //////////////////////////////////////////////////////////////////////////////
   // check all zero and inf cases.
@@ -130,7 +130,7 @@ static void mul_pf_single(PBound *dest, PFloat lhs, PFloat rhs)
   }
 }
 
-static void mul_lower(PBound *dest, PFloat lhs, PFloat rhs){
+static void mul_lower(PBound *dest, PTile lhs, PTile rhs){
   PBound temp;
   mul_pf_single(&temp, lhs, rhs);
   if (isallpreals(&temp)){
@@ -140,7 +140,7 @@ static void mul_lower(PBound *dest, PFloat lhs, PFloat rhs){
   }
 };
 
-static void mul_upper(PBound *dest, PFloat lhs, PFloat rhs){  //bail if this problem is already solved.
+static void mul_upper(PBound *dest, PTile lhs, PTile rhs){  //bail if this problem is already solved.
   if (isallpreals(dest)) {return;}
 
   PBound temp;
@@ -180,7 +180,7 @@ static void single_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
     }
 
     bool lhs_neg = is_pf_negative(lhs->lower);
-    PFloat lhs_proxy = lhs_neg ? pf_additiveinverse(lhs->lower) : lhs->lower;
+    PTile lhs_proxy = lhs_neg ? pf_additiveinverse(lhs->lower) : lhs->lower;
 
     dest->state = STDBOUND;
     mul_lower(dest, rhs->lower, lhs_proxy);
@@ -214,7 +214,7 @@ static void inf_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
 
     int _state = isnegative(lhs) * 1 + isnegative(rhs) * 2;
 
-    PFloat _l, _u;
+    PTile _l, _u;
 
     // canonical examples:
     // (100, 1) * (3, 4)     -> (300, 4)    (l * l, u * u)
@@ -331,10 +331,10 @@ void mul(PBound *dest, const PBound *lhs, const PBound *rhs){
   bool lhs_neg = isnegative(lhs);
   bool rhs_neg = isnegative(rhs);
 
-  PFloat lhs_lower_proxy = lhs_neg ? pf_additiveinverse(lhs->upper) : lhs->lower;
-  PFloat lhs_upper_proxy = lhs_neg ? pf_additiveinverse(lhs->lower) : lhs->upper;
-  PFloat rhs_lower_proxy = rhs_neg ? pf_additiveinverse(rhs->upper) : rhs->lower;
-  PFloat rhs_upper_proxy = rhs_neg ? pf_additiveinverse(rhs->lower) : rhs->upper;
+  PTile lhs_lower_proxy = lhs_neg ? pf_additiveinverse(lhs->upper) : lhs->lower;
+  PTile lhs_upper_proxy = lhs_neg ? pf_additiveinverse(lhs->lower) : lhs->upper;
+  PTile rhs_lower_proxy = rhs_neg ? pf_additiveinverse(rhs->upper) : rhs->lower;
+  PTile rhs_upper_proxy = rhs_neg ? pf_additiveinverse(rhs->lower) : rhs->upper;
 
   //presume our result is going to be a beautiful standard bound (may have to collapse.)
   dest->state = STDBOUND;

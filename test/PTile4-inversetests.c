@@ -1,6 +1,6 @@
-#include "PFloat4-test.h"
+#include "PTile4-test.h"
 
-void PFloat4_inversetests(){
+void PTile4_inversetests(){
   assert(pf_additiveinverse(pf1000) == pf1000);
   assert(pf_additiveinverse(pf1001) == pf0111);
   assert(pf_additiveinverse(pf1010) == pf0110);

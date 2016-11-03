@@ -9,7 +9,7 @@ How to use:
 
 You'll want to define a Unum lattice schema, using the function
 ```
-PEnv *create_pfloat_environment(double *lattice, int latticebits, int epochbits, double pivot)
+PEnv *create_ptile_environment(double *lattice, int latticebits, double stride)
 ```
 
 This function is passed an array of lattice points.  These are the positive, > 1
@@ -17,12 +17,7 @@ components of the lattice; there should be (2^latticebits - 1) values in this ar
 For example, the 4-bit Type-2 Unum with exact points {Inf, -2, -1, -1/2, 0, 1/2, 1, 2}
 should have a lattice [2], since that is the only component between 1 and infinity.
 
-epochbits are currently unsupported, but represents how many bits will specify the
-epoch in the floating point value.  pivot, is also currently unsupported, but should
-represent a value greater than the lattice which is the factor whose powers determine
-the range of each epoch.
-
-Given the lattice, latticebits, epochbits, and pivot, the function will
+Given the lattice, latticebits, epochbits, and stride, the function will
 automatically fill out the lookup tables for the desired lattices, and return a
 pointer to the environment variable.  There is a global variable pointer PENV
 which should be assigned to this location, which when enabled will allow all of
@@ -32,20 +27,20 @@ track of which environment the Unum calculations should be run in; C will do
 *nothing* to stop you from using a Unum generated in one environment in another
 environment.
 
-PFloats
+PTiles
 =======
 
-Pfloats in this library are 64-bit integers.  They correspond to the binary forms
+PTiles in this library are 64-bit integers.  They correspond to the binary forms
 described in the Gustafson spec, *left aligned*.  for example, the 4-bit unum
 value 2 (0b0110) is represented in this library as 0x6000000000000000.  This
 enables the library to take advantage of the innate cyclical nature of ℤ/(2^64)ℤ
 which is the signed integer type, as well as hardware signed integer comparison
 for ordering primitives.  Moreover, key constants, such as infinity, zero,
 one, and negative one, as well as masks for determining positivity, etc. are
-invariant across all PFloat types regardless of bitlength, simplifying status
+invariant across all PTile types regardless of bitlength, simplifying status
 testing pervasive in interval math operations.
 
-NB:  The size of the PFloat may be changed in a future revision, e.g. to 32 bit
+NB:  The size of the PTile may be changed in a future revision, e.g. to 32 bit
 integer.
 
 PBounds
@@ -56,13 +51,13 @@ using the following functions:
 
 ```
 void set_empty(PBound *dest);
-void set_single(PBound *dest, PFloat f);
-void set_bound(PBound *dest, PFloat lower, PFloat upper);
+void set_single(PBound *dest, PTile f);
+void set_bound(PBound *dest, PTile lower, PTile upper);
 void set_allreals(PBound *dest);
 ```
 
-which initialize the PBound to emptyset, a single pfloat, an interval of contiguous
-pfloats, or all projective real numbers, respectively.
+which initialize the PBound to emptyset, a single PTile, an interval of contiguous
+PTiles, or all projective real numbers, respectively.
 
 the following mathematical operations are available (NB: these may be subject to
   name changes to avoid namespace collisions):

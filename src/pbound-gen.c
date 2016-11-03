@@ -1,5 +1,5 @@
 #include "../include/pbound.h"
-#include "../include/pfloat.h"
+#include "../include/PTile.h"
 
 // GENERATIVE PBound functions
 
@@ -34,11 +34,11 @@ void set_empty(PBound *dest){
   dest->state = EMPTYSET;
 };
 
-void set_single(PBound *dest, PFloat value){
+void set_single(PBound *dest, PTile value){
   dest->state = SINGLETON;
   dest->lower = value;
 };
-void set_bound(PBound *dest, PFloat lower, PFloat upper){
+void set_bound(PBound *dest, PTile lower, PTile upper){
   dest->state = STDBOUND;
   dest->lower = lower;
   dest->upper = upper;

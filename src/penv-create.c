@@ -1,4 +1,4 @@
-//penv-create.c.  Creates on the heap a pfloat environment, with the specified parameters.
+//penv-create.c.  Creates on the heap a PTile environment, with the specified parameters.
 
 #include "../include/penv.h"
 #include <stdlib.h>
@@ -28,7 +28,7 @@ unsigned long long search_lattice(double *lattice, int lattice_length, double va
   return (lattice_length * 2) + 1;
 }
 
-static void create_addition_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double pivot){
+static void create_uninverted_addition_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -42,8 +42,8 @@ static void create_addition_table(unsigned long long **tables, double *lattice, 
 
       test_value = ((idx1 == 0) ? 1 : lattice[idx1 - 1]) + ((idx2 == 0) ? 1 : lattice[idx2 - 1]);
 
-      //check if the true value exceeds the pivot value.
-      if (test_value >= pivot) {test_value /= pivot;}
+      //check if the true value exceeds the stride value.
+      if (test_value >= stride) {test_value /= stride;}
       //search for the value we want.
       table[addsub_index(idx1 + 1, idx2 + 1)] = search_lattice(lattice, latticelength, test_value);
     }
@@ -53,7 +53,7 @@ static void create_addition_table(unsigned long long **tables, double *lattice, 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_inverted_addition_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double pivot){
+static void create_inverted_addition_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -66,8 +66,8 @@ static void create_inverted_addition_table(unsigned long long **tables, double *
       //assign the test value.
       test_value = 1/(((idx1 == 0) ? 1 : 1/lattice[idx1 - 1]) + ((idx2 == 0) ? 1 : 1/lattice[idx2 - 1]));
 
-      //check if the true value exceeds the pivot value.
-      if (test_value < 1) {test_value *= pivot;}
+      //check if the true value exceeds the stride value.
+      if (test_value < 1) {test_value *= stride;}
       //search for the value we want.
       table[addsub_index(idx1 + 1, idx2 + 1)] = search_lattice(lattice, latticelength, test_value);
     }
@@ -77,7 +77,7 @@ static void create_inverted_addition_table(unsigned long long **tables, double *
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_crossed_addition_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double pivot){
+static void create_crossed_addition_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -90,8 +90,8 @@ static void create_crossed_addition_table(unsigned long long **tables, double *l
       //assign the test value.
       test_value = (((idx1 == 0) ? 1 : lattice[idx1 - 1]) + ((idx2 == 0) ? 1 : 1/lattice[idx2 - 1]));
 
-      //check if the true value exceeds the pivot value.
-      if (test_value >= pivot) {test_value /= pivot;}
+      //check if the true value exceeds the stride value.
+      if (test_value >= stride) {test_value /= stride;}
 
       //search for the value we want.
       table[addsub_index(idx1 + 1, idx2 + 1)] = search_lattice(lattice, latticelength, test_value);
@@ -103,10 +103,10 @@ static void create_crossed_addition_table(unsigned long long **tables, double *l
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static unsigned long long search_epochs(double *true_value, double pivot_value){
+static unsigned long long search_epochs(double *true_value, double stride_value){
   unsigned long long epoch_delta = 0;
   while (*true_value < 1.0){
-    (*true_value) *= pivot_value;
+    (*true_value) *= stride_value;
     epoch_delta += 1;
   }
   return epoch_delta;
@@ -114,7 +114,7 @@ static unsigned long long search_epochs(double *true_value, double pivot_value){
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double pivot){
+static void create_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -129,8 +129,8 @@ static void create_subtraction_tables(unsigned long long **tables, double *latti
         //assign the test value.
         test_value = (((idx1 == 0) ? 1 : lattice[idx1 - 1]) - ((idx2 == 0) ? 1 : lattice[idx2 - 1]));
 
-        //check if the true value exceeds the pivot value.
-        unsigned long long epoch_value = search_epochs(&test_value, pivot);
+        //check if the true value exceeds the stride value.
+        unsigned long long epoch_value = search_epochs(&test_value, stride);
 
         //search for the value we want.
         vtable[addsub_index(idx1 + 1, idx2 + 1)] = search_lattice(lattice, latticelength, test_value);
@@ -148,7 +148,7 @@ static void create_subtraction_tables(unsigned long long **tables, double *latti
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_inverted_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double pivot){
+static void create_inverted_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -163,8 +163,8 @@ static void create_inverted_subtraction_tables(unsigned long long **tables, doub
         //assign the test value.
         test_value = 1/(((idx1 == 0) ? 1 : 1/lattice[idx1 - 1]) - ((idx2 == 0) ? 1 : 1/lattice[idx2 - 1]));
 
-        //check if the true value exceeds the pivot value.
-        unsigned long long epoch_value = search_epochs(&test_value, pivot);
+        //check if the true value exceeds the stride value.
+        unsigned long long epoch_value = search_epochs(&test_value, stride);
 
         //search for the value we want.
         vtable[addsub_index(idx1 + 1, idx2 + 1)] = search_lattice(lattice, latticelength, test_value);
@@ -182,7 +182,7 @@ static void create_inverted_subtraction_tables(unsigned long long **tables, doub
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_crossed_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double pivot){
+static void create_crossed_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -200,8 +200,8 @@ static void create_crossed_subtraction_tables(unsigned long long **tables, doubl
         //assign the test value.
         test_value = ((idx1 == 0) ? 1 : lattice[idx1 - 1]) - ((idx2 == 0) ? 1 : 1/lattice[idx2 - 1]);
 
-        //check if the true value exceeds the pivot value.
-        unsigned long long epoch_value = search_epochs(&test_value, pivot);
+        //check if the true value exceeds the stride value.
+        unsigned long long epoch_value = search_epochs(&test_value, stride);
 
         //search for the value we want.
         vtable[addsub_index(idx1 + 1, idx2 + 1)] = search_lattice(lattice, latticelength, test_value);
@@ -216,7 +216,7 @@ static void create_crossed_subtraction_tables(unsigned long long **tables, doubl
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_multiplication_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double pivot){
+static void create_multiplication_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -230,8 +230,8 @@ static void create_multiplication_table(unsigned long long **tables, double *lat
 
       test_value = (lattice[idx1 - 1]) * (lattice[idx2 - 1]);
 
-      //check if the true value exceeds the pivot value.
-      if (test_value >= pivot) {test_value /= pivot;}
+      //check if the true value exceeds the stride value.
+      if (test_value >= stride) {test_value /= stride;}
       //search for the value we want.
       table[muldiv_index(idx1 + 1, idx2 + 1)] = search_lattice(lattice, latticelength, test_value);
     }
@@ -241,7 +241,7 @@ static void create_multiplication_table(unsigned long long **tables, double *lat
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_division_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double pivot){
+static void create_division_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -255,8 +255,8 @@ static void create_division_table(unsigned long long **tables, double *lattice, 
 
       test_value = (lattice[idx1 - 1]) / (lattice[idx2 - 1]);
 
-      //check if the true value exceeds the pivot value.
-      if (test_value < 1) {test_value *= pivot;}
+      //check if the true value exceeds the stride value.
+      if (test_value < 1) {test_value *= stride;}
       //search for the value we want.
       table[muldiv_index(idx1 + 1, idx2 + 1)] = search_lattice(lattice, latticelength, test_value);
     }
@@ -266,7 +266,7 @@ static void create_division_table(unsigned long long **tables, double *lattice, 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_inversion_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double pivot){
+static void create_inversion_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -277,7 +277,7 @@ static void create_inversion_table(unsigned long long **tables, double *lattice,
   for (idx = 1; idx <= latticelength; idx++){
       //assign the test value.
 
-      test_value = pivot / lattice[idx - 1];
+      test_value = stride / lattice[idx - 1];
 
       //search for the value we want.
       table[idx - 1] = search_lattice(lattice, latticelength, test_value);
@@ -288,28 +288,28 @@ static void create_inversion_table(unsigned long long **tables, double *lattice,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PEnv *create_pfloat_environment(double *lattice, int latticebits, int epochbits, double pivot){
+PEnv *create_PTile_environment(double *lattice, int latticebits, int epochbits, double stride){
   __penv_mutable *environment = malloc(sizeof(__penv_mutable));
   environment->latticebits = latticebits;
   environment->epochbits = epochbits;
   environment->increment = (0x0000000000000001LL << (62 - latticebits - epochbits));
 
-  create_addition_table(environment->tables, lattice, latticebits, epochbits, pivot);
-  create_inverted_addition_table(environment->tables, lattice, latticebits, epochbits, pivot);
-  create_crossed_addition_table(environment->tables, lattice, latticebits, epochbits, pivot);
+  create_uninverted_addition_tables(environment->tables, lattice, latticebits, epochbits, stride);
+  create_inverted_addition_tables(environment->tables, lattice, latticebits, epochbits, stride);
+  create_crossed_addition_tables(environment->tables, lattice, latticebits, epochbits, stride);
 
-  create_subtraction_tables(environment->tables, lattice, latticebits, epochbits, pivot);
-  create_inverted_subtraction_tables(environment->tables, lattice, latticebits, epochbits, pivot);
-  create_crossed_subtraction_tables(environment->tables, lattice, latticebits, epochbits, pivot);
+  create_subtraction_tables(environment->tables, lattice, latticebits, epochbits, stride);
+  create_inverted_subtraction_tables(environment->tables, lattice, latticebits, epochbits, stride);
+  create_crossed_subtraction_tables(environment->tables, lattice, latticebits, epochbits, stride);
 
-  create_multiplication_table(environment->tables, lattice, latticebits, epochbits, pivot);
-  create_division_table(environment->tables, lattice, latticebits, epochbits, pivot);
-  create_inversion_table(environment->tables, lattice, latticebits, epochbits, pivot);
+  create_multiplication_table(environment->tables, lattice, latticebits, epochbits, stride);
+  create_division_table(environment->tables, lattice, latticebits, epochbits, stride);
+  create_inversion_table(environment->tables, lattice, latticebits, epochbits, stride);
 
   return (PEnv *)environment;
 }
 
-void delete_pfloat_environment(PEnv *environment){
+void delete_PTile_environment(PEnv *environment){
   int index;
   for (index = 0; index < __INV_TABLE; index++){
     free((void *)environment->tables[index]);

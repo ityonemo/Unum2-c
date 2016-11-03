@@ -1,8 +1,8 @@
 #include "../include/pbound.h"
-#include "../include/pfloat.h"
+#include "../include/PTile.h"
 
 void additiveinverse(PBound *v){
-  PFloat temp;
+  PTile temp;
   switch (v->state){
     case SINGLETON:
       v->lower = pf_additiveinverse(v->lower);
@@ -18,7 +18,7 @@ void additiveinverse(PBound *v){
 }
 
 void multiplicativeinverse(PBound *v){
-  PFloat temp;
+  PTile temp;
   switch (v->state){
     case SINGLETON:
       v->lower = pf_multiplicativeinverse(v->lower);

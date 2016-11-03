@@ -14,25 +14,27 @@ CC = cc $(CFLAGS)
 #flags for making a library
 
 #header files & dependency chain
-_IDEPS = pbound.h penv.h pfloat.h
+_IDEPS = pbound.h penv.h PTile.h
 IDEPS = $(patsubst %,$(IDIR)/%,$(_IDEPS))
-_HDEPS = PFloat4.h
+_HDEPS = PTile4.h
 HDEPS = $(patsubst %,$(HDIR)/%,$(_HDEPS))
 DEPS = $(IDEPS) $(HDEPS)
-_TDEPS = PFloat4-test.h
+_TDEPS = PTile4-test.h
 TDEPS = $(patsubst %,$(TDIR)/%,$(_TDEPS))
 #general objects
 _OBJ = pbound-cmp.o pbound-desc.o pbound-gen.o pbound-prop.o pbound-inv.o \
-       pbound-mul.o pbound-div.o pbound-add.o pbound-sub.o penv.o pfloat-iter.o \
-			 pfloat-prop.o pfloat-math-inv.o pfloat-synth.o penv-create.o PFloat4.o
+       pbound-mul.o pbound-div.o pbound-add.o pbound-sub.o penv.o ptile-iter.o \
+			 ptile-prop.o ptile-math-inv.o ptile-synth.o penv-create.o PTile4.o
 
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-_TEST = pfloat-test.o PFloat4-test.o PFloat4-paritytests.o PFloat4-inversetests.o \
-        PFloat4-itertests.o PFloat4-synthtests.o PFloat4-multest.o PFloat4-addtest.o \
-				PFloat4-boundmathtests.o PFloat4-creationtest.o
+_TEST = pfloat-test.o PTile4-test.o PTile4-paritytests.o PTile4-inversetests.o \
+        PTile4-itertests.o PTile4-synthtests.o PTile4-multest.o PTile4-addtest.o \
+				PTile4-boundmathtests.o PTile4-creationtest.o
 
 TEST = $(patsubst %,$(TDIR)/%,$(_TEST))
+
+################################################################################
 
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 	$(CC) -c -o $@ $<

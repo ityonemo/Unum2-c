@@ -1,5 +1,5 @@
 #include "../include/pbound.h"
-#include "../include/pfloat.h"
+#include "../include/PTile.h"
 
 /////////////////////
 // PBound comparison functions.  Note that some of these are a bit unusual.

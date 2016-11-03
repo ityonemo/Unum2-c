@@ -1,7 +1,7 @@
-#include "PFloat4-test.h"
+#include "PTile4-test.h"
 #include <stdio.h>
 
-void PFloat4_synthtests(){
+void PTile4_synthtests(){
   assert(pf_synth(true,  false, 0, 0x0000000000000003) == pf1001);
   assert(pf_synth(true,  false, 0, 0x0000000000000002) == pf1010);
   assert(pf_synth(true,  false, 0, 0x0000000000000001) == pf1011);

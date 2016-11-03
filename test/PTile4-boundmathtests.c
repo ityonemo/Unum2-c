@@ -1,4 +1,4 @@
-#include "PFloat4-test.h"
+#include "PTile4-test.h"
 #include <stdio.h>
 
 void checkadditiveinverse(PBound *a, PBound *b){
@@ -27,7 +27,7 @@ void checkmultiplication(PBound *a, PBound *b, PBound *res){
   assert(eq(res, &mul_res));
 }
 
-void PFloat4_bound_math_tests(){
+void PTile4_bound_math_tests(){
   /****************************************************************************
    * ADDITION                                                                 *
    ****************************************************************************/

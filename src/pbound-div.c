@@ -1,6 +1,6 @@
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/pfloat.h"
+#include "../include/PTile.h"
 #include <stdio.h>
 
 void div(PBound *dest, const PBound *lhs, const PBound *rhs){
@@ -17,7 +17,7 @@ unsigned long long invert(unsigned long long value){
   return (PENV->tables[__INV_TABLE])[(value >> 1) - 1];
 }
 
-void exact_arithmetic_division(PBound *dest, PFloat lhs, PFloat rhs)
+void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs)
 {
   long long res_epoch = pf_epoch(lhs) - pf_epoch(rhs);
   bool res_inverted = is_pf_inverted(lhs);
@@ -51,8 +51,8 @@ void exact_arithmetic_division(PBound *dest, PFloat lhs, PFloat rhs)
   if (!invertvalues) {
     set_single(dest, pf_synth(res_sign, res_inverted, res_epoch, res_lattice));
   } else if (__is_lattice_ulp(res_lattice)) {
-    PFloat _l = upper_ulp(pf_synth(res_sign, res_inverted, res_epoch, invert(res_lattice - 1)));
-    PFloat _u = lower_ulp(pf_synth(res_sign, res_inverted, res_epoch, invert(res_lattice + 1)));
+    PTile _l = upper_ulp(pf_synth(res_sign, res_inverted, res_epoch, invert(res_lattice - 1)));
+    PTile _u = lower_ulp(pf_synth(res_sign, res_inverted, res_epoch, invert(res_lattice + 1)));
     set_bound(dest, _l, _u);
     collapseifsingle(dest);
   } else {

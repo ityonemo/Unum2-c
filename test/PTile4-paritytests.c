@@ -1,6 +1,6 @@
-#include "PFloat4-test.h"
+#include "PTile4-test.h"
 
-void PFloat4_paritytests(){
+void PTile4_paritytests(){
   assert(!is_pf_positive(pf1000));
   assert(!is_pf_positive(pf1001));
   assert(!is_pf_positive(pf1010));
@@ -54,7 +54,7 @@ void PFloat4_paritytests(){
 }
 
 //spot testing on some bounds properties.
-void PFloat4_boundtests(){
+void PTile4_boundtests(){
   const unsigned long long __ngone = __inf & __one;
   PBound testsubject = {__zero, __zero, EMPTYSET};  //create a temporary holding value.
   /******************************************

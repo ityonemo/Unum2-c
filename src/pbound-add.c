@@ -1,6 +1,6 @@
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/pfloat.h"
+#include "../include/PTile.h"
 #include <stdio.h>
 
 int addsub_index(long long lhs_lattice, long long rhs_lattice){
@@ -11,7 +11,7 @@ int addsub_index(long long lhs_lattice, long long rhs_lattice){
   return (lpoint1 << (PENV->latticebits - 1)) + lpoint2;
 }
 
-static void exact_arithmetic_addition_crossed(PBound *dest, PFloat lhs, PFloat rhs){
+static void exact_arithmetic_addition_crossed(PBound *dest, PTile lhs, PTile rhs){
 
   int res_epoch = pf_epoch(lhs);
   unsigned long long res_lattice;
@@ -29,7 +29,7 @@ static void exact_arithmetic_addition_crossed(PBound *dest, PFloat lhs, PFloat r
   set_single(dest, pf_synth(is_pf_negative(lhs), false, res_epoch, res_lattice));
 }
 
-static void exact_arithmetic_addition_inverted(PBound *dest, PFloat lhs, PFloat rhs){
+static void exact_arithmetic_addition_inverted(PBound *dest, PTile lhs, PTile rhs){
 
   int res_epoch = pf_epoch(lhs);
   unsigned long long res_lattice;
@@ -54,8 +54,8 @@ static void exact_arithmetic_addition_inverted(PBound *dest, PFloat lhs, PFloat 
   if (res_inverted) {
     set_single(dest, pf_synth(res_sign, true, res_epoch, res_lattice));
   } else if (__is_lattice_ulp(res_lattice)) {
-    PFloat _l = upper_ulp(pf_synth(res_sign, false, res_epoch, invert(res_lattice + 1)));
-    PFloat _u = lower_ulp(pf_synth(res_sign, false, res_epoch, invert(res_lattice - 1)));
+    PTile _l = upper_ulp(pf_synth(res_sign, false, res_epoch, invert(res_lattice + 1)));
+    PTile _u = lower_ulp(pf_synth(res_sign, false, res_epoch, invert(res_lattice - 1)));
     set_bound(dest, _l, _u);
     collapseifsingle(dest);
   } else {
@@ -63,7 +63,7 @@ static void exact_arithmetic_addition_inverted(PBound *dest, PFloat lhs, PFloat 
   }
 }
 
-static void exact_arithmetic_addition_uninverted(PBound *dest, PFloat lhs, PFloat rhs){
+static void exact_arithmetic_addition_uninverted(PBound *dest, PTile lhs, PTile rhs){
   int res_epoch = pf_epoch(lhs);
   unsigned long long res_lattice;
   unsigned long long lhs_lattice = pf_lattice(lhs);
@@ -80,13 +80,13 @@ static void exact_arithmetic_addition_uninverted(PBound *dest, PFloat lhs, PFloa
   set_single(dest, pf_synth(is_pf_negative(lhs), false, res_epoch, res_lattice));
 }
 
-static void exact_arithmetic_addition(PBound *dest, PFloat lhs, PFloat rhs){
+static void exact_arithmetic_addition(PBound *dest, PTile lhs, PTile rhs){
   //swap the order of the two terms to make sure that the outer float appears
   //first.
   bool orderswap = is_pf_negative(lhs) ^ (__s(lhs) < __s(rhs));
 
-  PFloat outer = orderswap ? rhs : lhs;
-  PFloat inner = orderswap ? lhs : rhs;
+  PTile outer = orderswap ? rhs : lhs;
+  PTile inner = orderswap ? lhs : rhs;
 
   if (is_pf_inverted(outer) ^ is_pf_inverted(inner)) {
     exact_arithmetic_addition_crossed(dest, outer, inner);
@@ -97,7 +97,7 @@ static void exact_arithmetic_addition(PBound *dest, PFloat lhs, PFloat rhs){
   }
 }
 
-static void pf_exact_add(PBound *dest, PFloat lhs, PFloat rhs){
+static void pf_exact_add(PBound *dest, PTile lhs, PTile rhs){
   //redo the checks on this in case we've been passed from inexact_add.
   if (is_pf_inf(lhs)) {set_inf(dest); return;}
   if (is_pf_inf(rhs)) {set_inf(dest); return;}
@@ -111,17 +111,17 @@ static void pf_exact_add(PBound *dest, PFloat lhs, PFloat rhs){
   }
 }
 
-static void pf_inexact_add(PBound *dest, PFloat lhs, PFloat rhs){
+static void pf_inexact_add(PBound *dest, PTile lhs, PTile rhs){
   PBound temp = __EMPTYBOUND;
   pf_exact_add(&temp, glb(lhs), glb(rhs));
-  PFloat _l = upper_ulp(temp.lower);
+  PTile _l = upper_ulp(temp.lower);
   pf_exact_add(&temp, lub(lhs), lub(rhs));
-  PFloat _u = (temp.state == SINGLETON) ? lower_ulp(temp.lower) : lower_ulp(temp.upper);
+  PTile _u = (temp.state == SINGLETON) ? lower_ulp(temp.lower) : lower_ulp(temp.upper);
   set_bound(dest, _l, _u);
   collapseifsingle(dest);
 }
 
-static void pf_add(PBound *dest, PFloat lhs, PFloat rhs){
+static void pf_add(PBound *dest, PTile lhs, PTile rhs){
   if (is_pf_inf(lhs)) {set_inf(dest); return;}
   if (is_pf_inf(rhs)) {set_inf(dest); return;}
   if (is_pf_zero(lhs)) {set_single(dest, rhs); return;}
@@ -142,8 +142,8 @@ void add(PBound *dest, const PBound *lhs, const PBound *rhs){
   if (issingle(lhs) && issingle(rhs)) {pf_add(dest, lhs->lower, rhs->lower); return;}
 
   //assign proxy values because "single" doesn't have a meaningful upper value.
-  PFloat lhs_upper_proxy = issingle(lhs) ? lhs->lower : lhs->upper;
-  PFloat rhs_upper_proxy = issingle(rhs) ? rhs->lower : rhs->upper;
+  PTile lhs_upper_proxy = issingle(lhs) ? lhs->lower : lhs->upper;
+  PTile rhs_upper_proxy = issingle(rhs) ? rhs->lower : rhs->upper;
 
   //NB: consider going directly to "single_add" with a double single check.
   //go ahead and do both sides of the bound calculation.  Use a temporary variable.

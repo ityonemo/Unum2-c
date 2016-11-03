@@ -1,4 +1,4 @@
-#include "PFloat4-test.h"
+#include "PTile4-test.h"
 #include <stdio.h>
 
 bool test_add(const PBound *lhs, const PBound *rhs, const PBound *res){
@@ -12,7 +12,7 @@ bool test_add(const PBound *lhs, const PBound *rhs, const PBound *res){
   return (eq(res, &testres));
 }
 
-void PFloat4_addtest(){
+void PTile4_addtest(){
   PBound pb_0001_0011 = {pf0001, pf0011, STDBOUND};
   PBound pb_0001_0101 = {pf0001, pf0101, STDBOUND};
   PBound pb_0001_0111 = {pf0001, pf0111, STDBOUND};

@@ -1,17 +1,17 @@
 #include <stdio.h>
-#include "PFloat4-test.h"
-#include "../src/PFloat4.h"
+#include "PTile4-test.h"
+#include "../src/PTile4.h"
 
 int main(){
-  set_PFloat4();
-  PFloat4_paritytests();
-  PFloat4_inversetests();
-  PFloat4_itertests();
-  PFloat4_synthtests();
-  PFloat4_multest();
-  PFloat4_addtest();
-  PFloat4_bound_math_tests();
-  PFloat4_creationtest();
+  set_PTile4();
+  PTile4_paritytests();
+  PTile4_inversetests();
+  PTile4_itertests();
+  PTile4_synthtests();
+  PTile4_multest();
+  PTile4_addtest();
+  PTile4_bound_math_tests();
+  PTile4_creationtest();
   printf("OK\n");
   return 0;
 }

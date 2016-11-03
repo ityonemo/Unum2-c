@@ -30,6 +30,6 @@ typedef struct {
 
 extern PEnv* PENV;
 
-PEnv *create_pfloat_environment(double *lattice, int latticebits, int epochbits, double pivot);
+PEnv *create_PTile_environment(double *lattice, int latticebits, int epochbits, double stride);
 
 #endif

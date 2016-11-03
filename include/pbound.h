@@ -5,13 +5,13 @@
 #define __PBOUND_H
 
 #include <stdbool.h>
-#include "pfloat.h"
+#include "PTile.h"
 
 typedef enum {EMPTYSET, SINGLETON, STDBOUND, ALLREALS} PState;
 
 typedef struct {
-   PFloat lower;
-   PFloat upper;
+   PTile lower;
+   PTile upper;
    PState state;
 } PBound;
 
@@ -41,8 +41,8 @@ void set_f64(PBound *v, double f);
 void set_int(PBound *v, long long i);
 
 void set_empty(PBound *dest);
-void set_single(PBound *dest, PFloat f);
-void set_bound(PBound *dest, PFloat lower, PFloat upper);
+void set_single(PBound *dest, PTile f);
+void set_bound(PBound *dest, PTile lower, PTile upper);
 void set_allreals(PBound *dest);
 
 void pcopy(PBound *dest, const PBound *src);
@@ -74,12 +74,12 @@ void div(PBound *dest, const PBound *lhs, const PBound *rhs);
 int addsub_index(long long lhs_lattice, long long rhs_lattice);
 /* pbound-div.c: */
 bool __is_lattice_ulp(int lu);
-void exact_arithmetic_division(PBound *dest, PFloat lhs, PFloat rhs);
+void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs);
 unsigned long long invert(unsigned long long value);
 /* pbound-mul.c: */
 int muldiv_index(long long lhs_lattice, long long rhs_lattice);
 /* pbound-sub.c: */
-void exact_arithmetic_subtraction(PBound *dest, PFloat lhs, PFloat rhs);
+void exact_arithmetic_subtraction(PBound *dest, PTile lhs, PTile rhs);
 
 
 ////////////////////////////////////////////////////////////////////////////////

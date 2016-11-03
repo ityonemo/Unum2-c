@@ -1,47 +1,47 @@
-#ifndef __PFLOAT_H
-#define __PFLOAT_H
+#ifndef __PTile_H
+#define __PTile_H
 
-typedef unsigned long long PFloat;
+typedef unsigned long long PTile;
 
 ////////////////////////////////////////////////////////////////////////////////
-// Properties of PFloats
+// Properties of PTiles
 
-bool is_pf_positive(PFloat x);
-bool is_pf_negative(PFloat x);
-bool is_pf_inverted(PFloat x);
-bool is_pf_exact(PFloat x);
-bool is_pf_ulp(PFloat x);
-bool is_pf_inf(PFloat x);
-bool is_pf_zero(PFloat x);
+bool is_pf_positive(PTile x);
+bool is_pf_negative(PTile x);
+bool is_pf_inverted(PTile x);
+bool is_pf_exact(PTile x);
+bool is_pf_ulp(PTile x);
+bool is_pf_inf(PTile x);
+bool is_pf_zero(PTile x);
 
 ////////////////////////////////////////////////////////////////////////////////
 // iteration tools
 
-PFloat next(PFloat x);
-PFloat prev(PFloat x);
-PFloat glb(PFloat x);
-PFloat lub(PFloat x);
-PFloat upper_ulp(PFloat x);
-PFloat lower_ulp(PFloat x);
+PTile next(PTile x);
+PTile prev(PTile x);
+PTile glb(PTile x);
+PTile lub(PTile x);
+PTile upper_ulp(PTile x);
+PTile lower_ulp(PTile x);
 
 ////////////////////////////////////////////////////////////////////////////////
 // synthesis and decomposition tools
-PFloat    pf_synth(bool negative, bool inverted, long long epoch, unsigned long long lattice);
-long long pf_epoch(PFloat value);
-unsigned long long pf_lattice(PFloat value);
+PTile    pf_synth(bool negative, bool inverted, long long epoch, unsigned long long lattice);
+long long pf_epoch(PTile value);
+unsigned long long pf_lattice(PTile value);
 
 ////////////////////////////////////////////////////////////////////////////////
 // math tools
-PFloat pf_additiveinverse(PFloat val);
-PFloat pf_multiplicativeinverse(PFloat val);
+PTile pf_additiveinverse(PTile val);
+PTile pf_multiplicativeinverse(PTile val);
 
 ////////////////////////////////////////////////////////////////////////////////
 // SPECIAL DEFINES
 
 //explicit type conversions.
-#define __s(pfloatval) (long long)(pfloatval)            //converts pfloatval to a signed integer
-#define __u(pfloatval) (unsigned long long)(pfloatval)   //converts pfloatval to an unsigned integer
-#define __p(intval) (PFloat)(intval)                     //converts integer value to a pfloat.
+#define __s(PTileval) (long long)(PTileval)            //converts PTileval to a signed integer
+#define __u(PTileval) (unsigned long long)(PTileval)   //converts PTileval to an unsigned integer
+#define __p(intval) (PTile)(intval)                     //converts integer value to a PTile.
 
 //inline-able constant values.
 #define __zero  (0x0000000000000000U)

@@ -1,4 +1,4 @@
-#include "PFloat4-test.h"
+#include "PTile4-test.h"
 #include <stdio.h>
 
 bool test_mul(const PBound *lhs, const PBound *rhs, const PBound *res){
@@ -13,7 +13,7 @@ bool test_mul(const PBound *lhs, const PBound *rhs, const PBound *res){
 }
 
 
-void PFloat4_multest(){
+void PTile4_multest(){
   const PBound allreals = {__zero, __zero, ALLREALS};
   const PBound pb_0001_0011 = {pf0001, pf0011, STDBOUND};
   const PBound pb_0001_0111 = {pf0001, pf0111, STDBOUND};
