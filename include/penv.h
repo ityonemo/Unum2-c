@@ -14,6 +14,7 @@ enum{
   __SUB_CROSSED_EPOCH_TABLE,
   __MUL_TABLE,
   __DIV_TABLE,
+  __DIV_INV_TABLE,
   __INV_TABLE
 };
 

@@ -28,7 +28,7 @@ unsigned long long search_lattice(double *lattice, int lattice_length, double va
   return (lattice_length * 2) + 1;
 }
 
-static void create_uninverted_addition_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
+static void create_uninverted_addition_tables(unsigned long long **tables, double *lattice, int latticebits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -53,7 +53,7 @@ static void create_uninverted_addition_tables(unsigned long long **tables, doubl
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_inverted_addition_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
+static void create_inverted_addition_tables(unsigned long long **tables, double *lattice, int latticebits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -77,7 +77,7 @@ static void create_inverted_addition_tables(unsigned long long **tables, double 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_crossed_addition_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
+static void create_crossed_addition_tables(unsigned long long **tables, double *lattice, int latticebits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -114,7 +114,7 @@ static unsigned long long search_epochs(double *true_value, double stride_value)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
+static void create_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -148,7 +148,7 @@ static void create_subtraction_tables(unsigned long long **tables, double *latti
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_inverted_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
+static void create_inverted_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -182,7 +182,7 @@ static void create_inverted_subtraction_tables(unsigned long long **tables, doub
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_crossed_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
+static void create_crossed_subtraction_tables(unsigned long long **tables, double *lattice, int latticebits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -216,11 +216,11 @@ static void create_crossed_subtraction_tables(unsigned long long **tables, doubl
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_multiplication_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
+static void create_multiplication_tables(unsigned long long **tables, double *lattice, int latticebits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
-  //allocate the memory for this thing.
+  //allocate the memory for the two tables
   unsigned long long *table = (unsigned long long*) malloc(sizeof(unsigned long long) * (latticelength) * (latticelength));
 
   int idx1, idx2;
@@ -241,12 +241,13 @@ static void create_multiplication_table(unsigned long long **tables, double *lat
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_division_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
+static void create_division_tables(unsigned long long **tables, double *lattice, int latticebits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
   //allocate the memory for this thing.
   unsigned long long *table = (unsigned long long*) malloc(sizeof(unsigned long long) * (latticelength) * (latticelength));
+  unsigned long long *inv_table = (unsigned long long*) malloc(sizeof(unsigned long long) * (latticelength) * (latticelength));
 
   int idx1, idx2;
   for (idx1 = 1; idx1 <= latticelength; idx1++)
@@ -259,14 +260,16 @@ static void create_division_table(unsigned long long **tables, double *lattice, 
       if (test_value < 1) {test_value *= stride;}
       //search for the value we want.
       table[muldiv_index(idx1 + 1, idx2 + 1)] = search_lattice(lattice, latticelength, test_value);
+      inv_table[muldiv_index(idx1 + 1, idx2 + 1)] = search_lattice(lattice, latticelength, stride / test_value);
     }
   //assign the appropriate tables slot to the table pointer.
   tables[__DIV_TABLE] = table;
+  tables[__DIV_INV_TABLE] = inv_table;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void create_inversion_table(unsigned long long **tables, double *lattice, int latticebits, int epochbits, double stride){
+static void create_inversion_table(unsigned long long **tables, double *lattice, int latticebits, double stride){
   int latticelength = lattice_length(latticebits);
   double test_value;
 
@@ -294,17 +297,17 @@ PEnv *create_PTile_environment(double *lattice, int latticebits, int epochbits, 
   environment->epochbits = epochbits;
   environment->increment = (0x0000000000000001LL << (62 - latticebits - epochbits));
 
-  create_uninverted_addition_tables(environment->tables, lattice, latticebits, epochbits, stride);
-  create_inverted_addition_tables(environment->tables, lattice, latticebits, epochbits, stride);
-  create_crossed_addition_tables(environment->tables, lattice, latticebits, epochbits, stride);
+  create_uninverted_addition_tables(environment->tables, lattice, latticebits, stride);
+  create_inverted_addition_tables(environment->tables, lattice, latticebits, stride);
+  create_crossed_addition_tables(environment->tables, lattice, latticebits, stride);
 
-  create_subtraction_tables(environment->tables, lattice, latticebits, epochbits, stride);
-  create_inverted_subtraction_tables(environment->tables, lattice, latticebits, epochbits, stride);
-  create_crossed_subtraction_tables(environment->tables, lattice, latticebits, epochbits, stride);
+  create_subtraction_tables(environment->tables, lattice, latticebits, stride);
+  create_inverted_subtraction_tables(environment->tables, lattice, latticebits, stride);
+  create_crossed_subtraction_tables(environment->tables, lattice, latticebits, stride);
 
-  create_multiplication_table(environment->tables, lattice, latticebits, epochbits, stride);
-  create_division_table(environment->tables, lattice, latticebits, epochbits, stride);
-  create_inversion_table(environment->tables, lattice, latticebits, epochbits, stride);
+  create_multiplication_tables(environment->tables, lattice, latticebits, stride);
+  create_division_tables(environment->tables, lattice, latticebits, stride);
+  create_inversion_table(environment->tables, lattice, latticebits, stride);
 
   return (PEnv *)environment;
 }

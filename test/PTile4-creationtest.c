@@ -3,6 +3,7 @@
 #include "PTile4-test.h"
 #include "../include/penv.h"
 #include "../src/PTile4.h"
+#include <stdio.h>
 
 static void check_array(const unsigned long long *a1, const unsigned long long *a2, int size){
   int index;

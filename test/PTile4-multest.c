@@ -48,6 +48,7 @@ void PTile4_multest(){
   assert(test_mul(&pb1001, &pb1010, &pb0111));
   assert(test_mul(&pb1001, &pb1011, &pb0111));
   assert(test_mul(&pb1001, &pb1100, &pb0111));
+
   assert(test_mul(&pb1001, &pb1101, &pb_0101_0111));
   assert(test_mul(&pb1001, &pb1110, &pb_0101_0111));
   assert(test_mul(&pb1001, &pb1111, &pb_0001_0111));

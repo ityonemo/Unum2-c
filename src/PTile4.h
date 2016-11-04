@@ -15,7 +15,9 @@ extern const unsigned long long __PTile4_inverted_subtraction_epoch_table[4];
 extern const unsigned long long __PTile4_crossed_subtraction_table[4];
 extern const unsigned long long __PTile4_crossed_subtraction_epoch_table[4];
 extern const unsigned long long __PTile4_multiplication_table[1];
+extern const unsigned long long __PTile4_inverted_multiplication_table[1];
 extern const unsigned long long __PTile4_division_table[1];
+extern const unsigned long long __PTile4_inverted_division_table[1];
 extern const unsigned long long __PTile4_inversion_table[1];
 
 //declare the existence of PTile4

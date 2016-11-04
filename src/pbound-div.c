@@ -25,6 +25,7 @@ void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs)
   unsigned long long lhs_lattice = pf_lattice(lhs);
   unsigned long long rhs_lattice = pf_lattice(rhs);
   unsigned long long res_lattice = 0;
+  unsigned long long res_lattice_inv = 0;
 
   bool invertvalues = false;
 
@@ -36,6 +37,7 @@ void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs)
     res_lattice = lhs_lattice;
   } else { //do a lookup.
     res_lattice = (PENV->tables[__DIV_TABLE])[muldiv_index(lhs_lattice, rhs_lattice)];
+    res_lattice_inv = (PENV->tables[__DIV_INV_TABLE])[muldiv_index(lhs_lattice, rhs_lattice)];
     res_epoch -= res_lattice > lhs_lattice ? 1 : 0;
     //check to see if we need to go to a lower epoch.
   }
@@ -48,16 +50,6 @@ void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs)
     invertvalues = !invertvalues;
   }
 
-  if (!invertvalues) {
-    set_single(dest, pf_synth(res_sign, res_inverted, res_epoch, res_lattice));
-  } else if (__is_lattice_ulp(res_lattice)) {
-    PTile _l = upper_ulp(pf_synth(res_sign, res_inverted, res_epoch, invert(res_lattice - 1)));
-    PTile _u = lower_ulp(pf_synth(res_sign, res_inverted, res_epoch, invert(res_lattice + 1)));
-    set_bound(dest, _l, _u);
-    collapseifsingle(dest);
-  } else {
-    set_single(dest, pf_synth(res_sign, res_inverted, res_epoch, invert(res_lattice)));
-  }
+  set_single(dest, pf_synth(res_sign, res_inverted, res_epoch, invertvalues ? res_lattice_inv : res_lattice));
   return;
 };
-
