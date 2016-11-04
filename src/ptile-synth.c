@@ -1,6 +1,6 @@
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/PTile.h"
+#include "../include/ptile.h"
 
 PTile pf_synth(bool negative, bool inverted, long long epoch, unsigned long long lattice){
   //check for overflow condition.

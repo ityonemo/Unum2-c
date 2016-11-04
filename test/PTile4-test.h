@@ -3,7 +3,7 @@
 
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/PTile.h"
+#include "../include/ptile.h"
 #include <assert.h>
 
 const PTile pf0000;

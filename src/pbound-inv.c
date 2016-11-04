@@ -1,5 +1,5 @@
 #include "../include/pbound.h"
-#include "../include/PTile.h"
+#include "../include/ptile.h"
 
 void additiveinverse(PBound *v){
   PTile temp;

@@ -1,6 +1,6 @@
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/PTile.h"
+#include "../include/ptile.h"
 #include <stdio.h>
 
 static bool __resultparity(PTile lhs, PTile rhs){

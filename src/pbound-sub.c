@@ -1,6 +1,6 @@
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/PTile.h"
+#include "../include/ptile.h"
 
 void sub(PBound *dest, const PBound *lhs, const PBound *rhs){
   //allocate on the stack the rhs value, invert it, then add.

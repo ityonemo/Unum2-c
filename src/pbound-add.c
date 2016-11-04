@@ -1,6 +1,6 @@
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/PTile.h"
+#include "../include/ptile.h"
 #include <stdio.h>
 
 int addsub_index(long long lhs_lattice, long long rhs_lattice){

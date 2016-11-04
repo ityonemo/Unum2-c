@@ -1,6 +1,6 @@
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/PTile.h"
+#include "../include/ptile.h"
 
 bool is_pf_special(PTile x){
   return (x & __mask1) == 0;

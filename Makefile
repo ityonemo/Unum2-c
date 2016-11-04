@@ -14,7 +14,7 @@ CC = cc $(CFLAGS)
 #flags for making a library
 
 #header files & dependency chain
-_IDEPS = pbound.h penv.h PTile.h
+_IDEPS = pbound.h penv.h ptile.h
 IDEPS = $(patsubst %,$(IDIR)/%,$(_IDEPS))
 _HDEPS = PTile4.h
 HDEPS = $(patsubst %,$(HDIR)/%,$(_HDEPS))
@@ -38,9 +38,9 @@ TEST = $(patsubst %,$(TDIR)/%,$(_TEST))
 
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 	$(CC) -c -o $@ $<
-
-$(TDIR)/%.o: $(TDIR)/%.c $(DEPS) $(TDEPS)
-	$(CC) -c -o $@ $<
+#
+#$(TDIR)/%.o: $(TDIR)/%.c $(DEPS) $(TDEPS)
+#	$(CC) -c -o $@ $<
 
 test: clean $(OBJ) $(TEST) $(DEPS) $(TDEPS)
 	$(CC) -o pfloattest $(TEST) $(OBJ)

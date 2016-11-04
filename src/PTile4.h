@@ -3,7 +3,7 @@
 
 #include "../include/penv.h"
 #include "../include/pbound.h"
-#include "../include/PTile.h"
+#include "../include/ptile.h"
 
 extern const unsigned long long __PTile4_addition_table[4];
 extern const unsigned long long __PTile4_inverted_addition_table[4];

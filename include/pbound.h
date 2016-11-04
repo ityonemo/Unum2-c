@@ -5,7 +5,7 @@
 #define __PBOUND_H
 
 #include <stdbool.h>
-#include "PTile.h"
+#include "ptile.h"
 
 typedef enum {EMPTYSET, SINGLETON, STDBOUND, ALLREALS} PState;
 

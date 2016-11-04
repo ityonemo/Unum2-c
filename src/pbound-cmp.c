@@ -1,5 +1,5 @@
 #include "../include/pbound.h"
-#include "../include/PTile.h"
+#include "../include/ptile.h"
 
 /////////////////////
 // PBound comparison functions.  Note that some of these are a bit unusual.
@@ -60,4 +60,3 @@ bool in(const PBound *lhs, const PBound *rhs){
       return false;
   }
 }
-

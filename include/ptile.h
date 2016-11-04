@@ -1,5 +1,5 @@
-#ifndef __PTile_H
-#define __PTile_H
+#ifndef __PTILE_H
+#define __PTILE_H
 
 typedef unsigned long long PTile;
 
