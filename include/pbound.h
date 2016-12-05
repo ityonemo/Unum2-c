@@ -7,7 +7,12 @@
 #include <stdbool.h>
 #include "ptile.h"
 
-typedef enum {EMPTYSET, SINGLETON, STDBOUND, ALLREALS} PState;
+typedef enum {
+  EMPTYSET = 0,
+  SINGLETON,
+  STDBOUND,
+  ALLREALS
+} PState;
 
 typedef struct {
    PTile lower;
@@ -72,6 +77,7 @@ void div(PBound *dest, const PBound *lhs, const PBound *rhs);
 
 /* pbound-add.c: */
 int addsub_index(long long lhs_lattice, long long rhs_lattice);
+int table_addsub_index(int table, long long lhs_lattice, long long rhs_lattice);
 /* pbound-div.c: */
 bool __is_lattice_ulp(int lu);
 void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs);

@@ -19,6 +19,7 @@ unsigned long long invert(unsigned long long value){
 
 void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs)
 {
+//  printf("entering exact arithmetic division \n");
   long long res_epoch = pf_epoch(lhs) - pf_epoch(rhs);
   bool res_inverted = is_pf_inverted(lhs);
 
@@ -36,6 +37,7 @@ void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs)
   } else if (rhs_lattice == 0){
     res_lattice = lhs_lattice;
   } else { //do a lookup.
+//    printf("we're here:  lhs: %llX, rhs: %llX, index: %i\n", lhs_lattice, rhs_lattice, muldiv_index(lhs_lattice, rhs_lattice));
     res_lattice = (PENV->tables[__DIV_TABLE])[muldiv_index(lhs_lattice, rhs_lattice)];
     res_lattice_inv = (PENV->tables[__DIV_INV_TABLE])[muldiv_index(lhs_lattice, rhs_lattice)];
     res_epoch -= res_lattice > lhs_lattice ? 1 : 0;
@@ -45,10 +47,15 @@ void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs)
   bool res_sign = is_pf_negative(lhs) ^ is_pf_negative(rhs);
 
   if (res_epoch < 0){
+//    printf("yo, gonna invert\n");
     res_inverted = !is_pf_inverted(lhs);
     res_epoch = (-res_epoch) - 1;
     invertvalues = !invertvalues;
   }
+
+//  printf("norm_value %llX\n",res_lattice);
+//  printf("inv_value %llX\n" ,res_lattice_inv);
+
 
   set_single(dest, pf_synth(res_sign, res_inverted, res_epoch, invertvalues ? res_lattice_inv : res_lattice));
   return;
