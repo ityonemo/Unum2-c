@@ -1,6 +1,7 @@
 #include "../include/penv.h"
 #include "../include/pbound.h"
 #include "../include/ptile.h"
+#include <stdio.h>
 
 PTile pf_synth(bool negative, bool inverted, long long epoch, unsigned long long lattice){
   //check for overflow condition.
@@ -19,9 +20,9 @@ PTile pf_synth(bool negative, bool inverted, long long epoch, unsigned long long
 }
 
 long long pf_epoch(PTile value){
-  bool flipsign = is_pf_negative(value) ^ is_pf_inverted(value);
+  bool flipsign = (value & __one) == 0;
   long long temp = __s(value) * (flipsign ? -1 : 1);
-  return ((temp & __mask1) >> (63 - PENV->epochbits)) - 1;
+  return (temp & __mask2) >> (63 - PENV->epochbits);
 }
 
 unsigned long long pf_lattice(PTile value){

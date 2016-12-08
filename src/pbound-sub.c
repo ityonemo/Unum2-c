@@ -24,25 +24,26 @@ static void exact_arithmetic_subtraction_uninverted(PBound * dest, PTile lhs, PT
   unsigned long long rhs_lattice = pf_lattice(rhs);
 
   if (verbose) {printf("----\nentering uninverted subtraction\n");}
-
   //figure out the table delta.
 
   //ascertain the table that we'll need to look up.
   int table = lhs_epoch - rhs_epoch;
+  int lookup_index = table_addsub_index(table, lhs_lattice, rhs_lattice);
 
   if (table < PENV->table_counts[__SUB_TABLE]){
-    res_lattice = (PENV->tables[__SUB_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
-    res_epoch = rhs_epoch - (PENV->tables[__SUB_EPOCH_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
+    res_lattice = (PENV->tables[__SUB_TABLE])[lookup_index];
+    res_epoch = lhs_epoch - (PENV->tables[__SUB_EPOCH_TABLE])[lookup_index];
   } else {
-    set_single(dest, res_negative ? next(lhs) : last(lhs));
+    set_single(dest, res_negative ? next(lhs) : prev(lhs));
     return;
   }
 
   if (res_epoch < 0){
     res_inverted = true;
     res_epoch = 0;
-    res_lattice = (PENV->tables[__INVERTED_SUB_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
+    res_lattice = (PENV->tables[__INVERTED_SUB_TABLE])[lookup_index];
   }
+
   set_single(dest, pf_synth(res_negative, res_inverted, res_epoch, res_lattice));
 }
 
@@ -62,9 +63,9 @@ static void exact_arithmetic_subtraction_inverted(PBound * dest, PTile lhs, PTil
 
   if (table < PENV->table_counts[__SUB_INVERTED_TABLE]){
     res_lattice = (PENV->tables[__SUB_INVERTED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
-    res_epoch = rhs_epoch - (PENV->tables[__SUB_INVERTED_EPOCH_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
+    res_epoch = lhs_epoch + (PENV->tables[__SUB_INVERTED_EPOCH_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
   } else {
-    set_single(dest, res_negative ? next(lhs) : last(lhs));
+    set_single(dest, res_negative ? next(lhs) : prev(lhs));
     return;
   }
 
@@ -88,9 +89,9 @@ static void exact_arithmetic_subtraction_crossed(PBound *dest, PTile lhs, PTile 
 
   if (table < PENV->table_counts[__SUB_CROSSED_TABLE]){
     res_lattice = (PENV->tables[__SUB_CROSSED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
-    res_epoch = rhs_epoch - (PENV->tables[__SUB_CROSSED_EPOCH_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
+    res_epoch = lhs_epoch - (PENV->tables[__SUB_CROSSED_EPOCH_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
   } else {
-    set_single(dest, res_negative ? next(lhs) : last(lhs));
+    set_single(dest, res_negative ? next(lhs) : prev(lhs));
     return;
   }
 

@@ -17,8 +17,8 @@ int addsub_index(long long lhs_lattice, long long rhs_lattice){
 int table_addsub_index(int table, long long lhs_lattice, long long rhs_lattice){
   int lpoint1 = (lhs_lattice >> 1);
   int lpoint2 = (rhs_lattice >> 1);
-  int tablewidth = (PENV->latticebits - 1);
-  return table * tablewidth * tablewidth + (lpoint1 << (tablewidth)) + lpoint2;
+  int tablewidth = (1 << (PENV->latticebits - 1));
+  return table * tablewidth * tablewidth + (lpoint1 * tablewidth) + lpoint2;
 }
 
 static void exact_arithmetic_addition_crossed(PBound *dest, PTile lhs, PTile rhs){
@@ -36,11 +36,15 @@ static void exact_arithmetic_addition_crossed(PBound *dest, PTile lhs, PTile rhs
 
     set_single(dest, pf_synth(res_negative, false, res_epoch, res_lattice));
   } else {
-    set_single(dest, res_negative ? last(lhs) : next(lhs));
+    set_single(dest, res_negative ? prev(lhs) : next(lhs));
   }
 }
 
 static void exact_arithmetic_addition_inverted(PBound *dest, PTile lhs, PTile rhs){
+
+  if (verbose) {
+    printf("entering inverted exact add:\n");
+  }
 
   int res_epoch = pf_epoch(lhs);
   unsigned long long res_lattice;
@@ -49,20 +53,32 @@ static void exact_arithmetic_addition_inverted(PBound *dest, PTile lhs, PTile rh
   bool res_negative = is_pf_negative(lhs);
   bool res_inverted = is_pf_inverted(lhs);
   int table = pf_epoch(rhs) - res_epoch;
+  int index = table_addsub_index(table, lhs_lattice, rhs_lattice);
+
+  if (verbose) {
+    printf("exact add seeking table %i \n", table);
+    printf("exact add seeking index %i \n", index);
+  }
 
   if (table < PENV->table_counts[__ADD_INVERTED_TABLE]) {
-    res_lattice = (PENV->tables[__ADD_INVERTED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
+    res_lattice = (PENV->tables[__ADD_INVERTED_TABLE])[index];
+
+    //printf("c says lattice value should be %llX\n", res_lattice);
+    //printf("c says res_epoch: %i\n", res_epoch);
+
     res_epoch -= (res_lattice > lhs_lattice) ? 1 : 0;
   } else {
-    set_single(dest, res_negative ? last(lhs) : next(lhs));
+    set_single(dest, res_negative ? prev(lhs) : next(lhs));
     return;
   }
 
   if (res_epoch < 0){
     res_inverted = false;
     res_epoch = 0;
-    res_lattice = (PENV->tables[__INVERTED_ADD_INVERTED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
+    res_lattice = (PENV->tables[__INVERTED_ADD_INVERTED_TABLE])[index];
   }
+
+  //printf("final for c - epoch: %i lattice: %lli \n", res_epoch, res_lattice);
 
   set_single(dest, pf_synth(res_negative, res_inverted, res_epoch, res_lattice));
 }
@@ -81,7 +97,7 @@ static void exact_arithmetic_addition_uninverted(PBound *dest, PTile lhs, PTile 
 
     set_single(dest, pf_synth(res_negative, false, res_epoch, res_lattice));
   } else {
-    set_single(dest, res_negative ? last(lhs) : next(lhs));
+    set_single(dest, res_negative ? prev(lhs) : next(lhs));
   }
 }
 

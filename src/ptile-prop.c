@@ -18,6 +18,10 @@ bool is_pf_negative(PTile x){
   return (is_pf_normal(x)) && ((x & __inf) != 0);
 }
 
+bool pf_inverted_bit(PTile x){
+  return (x & __one) != 0;
+}
+
 bool is_pf_inverted(PTile x){
   if ((x & __mask2) == 0) {return false;};
   return ((x & __inf) == 0) == ((x & __one) == 0);
