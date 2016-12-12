@@ -1,0 +1,20 @@
+#include "PFloat4.h"
+const unsigned long long __Lnum4_add_table[4]={0x0000000000000002,0x0000000000000003,0x0000000000000003,0x0000000000000000};
+const unsigned long long __Lnum4_add_inv_table[4]={0x0000000000000002,0x0000000000000003,0x0000000000000003,0x0000000000000000};
+const unsigned long long __Lnum4_add_cross_table[4]={0x0000000000000001,0x0000000000000001,0x0000000000000003,0x0000000000000003};
+const unsigned long long __Lnum4_sub_table[8]={0xffffffffffffffff,0xffffffffffffffff,0x0000000000000000,0xffffffffffffffff,0x0000000000000003,0x0000000000000002,0x0000000000000001,0x0000000000000001};
+const unsigned long long __Lnum4_sub_inv_table[8]={0xffffffffffffffff,0x0000000000000002,0xffffffffffffffff,0xffffffffffffffff,0x0000000000000001,0x0000000000000001,0x0000000000000000,0x0000000000000003};
+const unsigned long long __Lnum4_sub_cross_table[4]={0xffffffffffffffff,0x0000000000000002,0x0000000000000000,0x0000000000000001};
+const unsigned long long __Lnum4_inv_add_inv_table[4]={0x0000000000000002,0x0000000000000001,0x0000000000000001,0x0000000000000000};
+const unsigned long long __Lnum4_inv_sub_table[8]={0xffffffffffffffff,0xffffffffffffffff,0x0000000000000003,0xffffffffffffffff,0x0000000000000001,0x0000000000000002,0x0000000000000003,0x0000000000000003};
+const unsigned long long __Lnum4_inv_sub_cross_table[4]={0xffffffffffffffff,0x0000000000000002,0x0000000000000003,0x0000000000000003};
+const unsigned long long __Lnum4_sub_epoch_table[8]={0xffffffffffffffff,0xffffffffffffffff,0x0000000000000000,0xffffffffffffffff,0x0000000000000001,0x0000000000000001,0x0000000000000000,0x0000000000000000};
+const unsigned long long __Lnum4_sub_inv_epoch_table[8]={0xffffffffffffffff,0x0000000000000000,0xffffffffffffffff,0xffffffffffffffff,0x0000000000000000,0x0000000000000000,0x0000000000000001,0x0000000000000000};
+const unsigned long long __Lnum4_sub_cross_epoch_table[4]={0xffffffffffffffff,0x0000000000000001,0x0000000000000000,0x0000000000000000};
+const unsigned long long __Lnum4_mul_table[1]={0x0000000000000000};
+const unsigned long long __Lnum4_div_table[1]={0x0000000000000000};
+const unsigned long long __Lnum4_inv_div_table[1]={0x0000000000000000};
+const unsigned long long __Lnum4_inv_table[1]={0x0000000000000002};
+const int __Lnum4_table_counts[6]={1,1,1,2,2,1};
+const PEnv PFloat4_ENV={2,1,0x1000000000000000,__Lnum4_table_counts,{__Lnum4_add_table,__Lnum4_add_inv_table,__Lnum4_add_cross_table,__Lnum4_sub_table,__Lnum4_sub_inv_table,__Lnum4_sub_cross_table,__Lnum4_inv_add_inv_table,__Lnum4_inv_sub_table,__Lnum4_inv_sub_cross_table,__Lnum4_sub_epoch_table,__Lnum4_sub_inv_epoch_table,__Lnum4_sub_cross_epoch_table,__Lnum4_mul_table,__Lnum4_div_table,__Lnum4_inv_div_table,__Lnum4_inv_table}};
+void set_PFloat4(){PENV = (PEnv *)(&PFloat4_ENV);}
