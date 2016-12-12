@@ -1,6 +1,6 @@
 #include <stdio.h>
+#include "PFloat4.h"
 #include "PTile4-test.h"
-#include "../src/PTile4.h"
 
 int main(){
   set_PTile4();
@@ -11,7 +11,6 @@ int main(){
   PTile4_multest();
   PTile4_addtest();
   PTile4_bound_math_tests();
-  PTile4_creationtest();
   printf("OK\n");
   return 0;
 }

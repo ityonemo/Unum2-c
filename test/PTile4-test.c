@@ -1,7 +1,7 @@
 
 #include "PTile4-test.h"
 
-extern PEnv PTile4_ENV;
+extern PEnv PFloat4_ENV;
 
 const PTile pf0000 = __p(0x0000000000000000);
 const PTile pf0001 = __p(0x1000000000000000);
@@ -38,5 +38,5 @@ const PBound pb1110 = {__p(0xE000000000000000), __zero, SINGLETON};
 const PBound pb1111 = {__p(0xF000000000000000), __zero, SINGLETON};
 
 void set_PTile4(){
-  PENV = (PEnv *)(&PTile4_ENV);
+  PENV = (PEnv *)(&PFloat4_ENV);
 }
