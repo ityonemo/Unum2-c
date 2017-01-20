@@ -27,17 +27,17 @@ bool roundszero(const PBound *v){
   if (v->state == ALLREALS) {return true;}
 
   if (roundsinf(v))
-    {return (is_pf_positive(v->lower) && is_pf_positive(v->upper)) || (is_pf_negative(v->lower) && is_pf_negative(v->upper));}
+    {return (is_tile_positive(v->lower) && is_tile_positive(v->upper)) || (is_tile_negative(v->lower) && is_tile_negative(v->upper));}
   else
-    {return is_pf_negative(v->lower) && is_pf_positive(v->upper);}
+    {return is_tile_negative(v->lower) && is_tile_positive(v->upper);}
 }
 
 bool isnegative(const PBound *v){
-  return (is_pf_inf(v->lower) || is_pf_negative(v->lower)) &&  (is_pf_negative(v->upper) || is_pf_zero(v->upper));
+  return (is_tile_inf(v->lower) || is_tile_negative(v->lower)) &&  (is_tile_negative(v->upper) || is_tile_zero(v->upper));
 }
 
 bool ispositive(const PBound *v){
-  return (is_pf_zero(v->lower) || is_pf_positive(v->lower)) && (is_pf_positive(v->upper) || is_pf_inf(v->upper));
+  return (is_tile_zero(v->lower) || is_tile_positive(v->lower)) && (is_tile_positive(v->upper) || is_tile_inf(v->upper));
 }
 
 void collapseifsingle(PBound *v){

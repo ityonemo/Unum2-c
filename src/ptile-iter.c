@@ -12,19 +12,19 @@ PTile prev(PTile x){
 
 //glb:  Greatest Lower Bound
 PTile glb(PTile x){
-  return is_pf_ulp(x) ? prev(x) : x;
+  return is_tile_ulp(x) ? prev(x) : x;
 }
 
 //lub:  Least Upper Bound
 PTile lub(PTile x){
-  return is_pf_ulp(x) ? next(x) : x;
+  return is_tile_ulp(x) ? next(x) : x;
 }
 
 
 PTile upper_ulp(PTile x){
-  return is_pf_ulp(x) ? x : next(x);
+  return is_tile_ulp(x) ? x : next(x);
 }
 
 PTile lower_ulp(PTile x){
-  return is_pf_ulp(x) ? x : prev(x);
+  return is_tile_ulp(x) ? x : prev(x);
 }

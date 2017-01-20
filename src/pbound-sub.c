@@ -12,7 +12,7 @@ void sub(PBound *dest, const PBound *lhs, const PBound *rhs){
 }
 
 static PTile exact_arithmetic_subtraction_uninverted(PTile lhs, PTile rhs){
-  bool res_negative = is_pf_negative(lhs);
+  bool res_negative = is_tile_negative(lhs);
   bool res_inverted = false;
   long long res_epoch;
   long long rhs_epoch = pf_epoch(rhs);
@@ -44,7 +44,7 @@ static PTile exact_arithmetic_subtraction_uninverted(PTile lhs, PTile rhs){
 }
 
 static PTile exact_arithmetic_subtraction_inverted(PTile lhs, PTile rhs){
-  bool res_negative = is_pf_negative(lhs);
+  bool res_negative = is_tile_negative(lhs);
   long long res_epoch;
   long long rhs_epoch = pf_epoch(rhs);
   long long lhs_epoch = pf_epoch(lhs);
@@ -66,7 +66,7 @@ static PTile exact_arithmetic_subtraction_inverted(PTile lhs, PTile rhs){
 }
 
 static PTile exact_arithmetic_subtraction_crossed(PTile lhs, PTile rhs){
-  bool res_negative = is_pf_negative(lhs);
+  bool res_negative = is_tile_negative(lhs);
   bool res_inverted = false;
   long long res_epoch;
   long long rhs_epoch = pf_epoch(rhs);
@@ -101,15 +101,15 @@ PTile exact_arithmetic_subtraction(PTile lhs, PTile rhs){
   //the numbers should have the same sign.  But we should order them so that the
   //first one is outer, and the second one is inner.
 
-  bool signswap = is_pf_negative(lhs) ^ (__s(lhs) < __s(rhs));
+  bool signswap = is_tile_negative(lhs) ^ (__s(lhs) < __s(rhs));
 
   PTile outer = signswap ? rhs : lhs;
   PTile inner = signswap ? lhs : rhs;
   PTile temp;
 
-  if (is_pf_inverted(outer) ^ is_pf_inverted(inner)) {
+  if (is_tile_inverted(outer) ^ is_tile_inverted(inner)) {
     temp = exact_arithmetic_subtraction_crossed(outer, inner);
-  } else if (is_pf_inverted(outer)) {
+  } else if (is_tile_inverted(outer)) {
     temp = exact_arithmetic_subtraction_inverted(outer, inner);
   } else {
     temp = exact_arithmetic_subtraction_uninverted(outer, inner);

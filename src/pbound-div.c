@@ -21,7 +21,7 @@ unsigned long long invert(unsigned long long value){
 
 void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs)
 {
-  bool res_sign = is_pf_negative(lhs) ^ is_pf_negative(rhs);
+  bool res_sign = is_tile_negative(lhs) ^ is_tile_negative(rhs);
   unsigned long long lhs_lattice = pf_lattice(lhs);
   unsigned long long rhs_lattice = pf_lattice(rhs);
   unsigned long long res_lattice = 0;
@@ -55,6 +55,6 @@ void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs)
     }
   }
 
-  set_single(dest, pf_synth(res_sign, res_inverted ^ is_pf_inverted(lhs), res_epoch, res_lattice));
+  set_single(dest, pf_synth(res_sign, res_inverted ^ is_tile_inverted(lhs), res_epoch, res_lattice));
   return;
 };

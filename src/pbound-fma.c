@@ -3,32 +3,50 @@
 #include "../include/ptile.h"
 #include <stdio.h>
 
+PTile exact_fma(PTile a, PTile b, PTile c, bool upper){
+  return __inf;
+}
+
+PTile inexact_fma(PTile a, PTile b, PTile c, bool upper){
+  if (upper){
+    bool mul_res_sign = is_tile_negative(a) ^ is_tile_negative(b)
+    // if the result is negative, the upper value will result from the inner values for both
+    // if the result is positive, the upper value will result from the outer values for both.
+    PTile a_bound = (mul_res_sign ^ is_tile_negative(a)) ? glb(a) : lub(a)
+    PTile b_bound = (mul_res_sign ^ is_tile_negative(b)) ? glb(b) : lub(b)
+
+    return lower_ulp(exact_fma(a_bound, b_bound, lub(c), true))
+  } else {
+    //decide if the multiplication result will be positive or negative.
+    bool mul_res_sign = is_tile_negative(a) ^ is_tile_negative(b)
+    //if the result is negative, the lower value will be the outer values for both
+    //if the result is positive, the lower value will result from the inner values for both.
+    PTile a_bound = (mul_res_sign ^ is_tile_negative(a)) ? lub(a) : glb(a)
+    PTile b_bound = (mul_res_sign ^ is_tile_negative(b)) ? lub(b) : glb(b)
+
+    return upper_ulp(exact_fma(a_bound, b_bound, glb(c), false))
+  }
+}
+
 PTile tile_fma(PTile a, PTile b, PTile c, bool upper){
   //fma for tile values.
 
   //go through the list of special values.
-  if      (is_pf_inf(a))  {return __inf;}
-  else if (is_pf_inf(b))  {return __inf;}
-  else if (is_pf_inf(c))  {return __inf;}
-  else if (is_pf_zero(a)) {return c;}
-  else if (is_pf_zero(b)) {return c;}
-  else if (is_zero(c))    {return tile_mul(a, b, upper);}
-  else if (is_one(a))     {return tile_add(b, c, upper);}
-  else if (is_one(b))     {return tile_add(a, c, upper);}
-  else if (is_neg_one(a)) {return tile_add(c, -b, upper);}
-  else if (is_neg_one(b)) {return tile_add(c, -a, upper);}
+  if      (is_tile_inf(a))     {return __inf;}
+  else if (is_tile_inf(b))     {return __inf;}
+  else if (is_tile_inf(c))     {return __inf;}
+  else if (is_tile_zero(a))    {return c;}
+  else if (is_tile_zero(b))    {return c;}
+  else if (is_tile_zero(c))    {return tile_mul(a, b, upper);}
+  else if (is_tile_one(a))     {return tile_add(b, c, upper);}
+  else if (is_tile_one(b))     {return tile_add(a, c, upper);}
+  else if (is_tile_neg_one(a)) {return tile_add(c, -b, upper);}
+  else if (is_tile_neg_one(b)) {return tile_add(c, -a, upper);}
 
-  if (isexact(a) && isexact(b) && isexact(c))
+  if (is_tile_exact(a) && is_tile_exact(b) && is_tile_exact(c))
     { return exact_fma(a, b, c, upper); }
   else
     { return inexact_fma(a, b, c, upper); }
-}
-
-PTile lower_fma(left_tile, right_tile, add_tile){
-  return tile_fma(left_tile, right_tile, add_tile, false);
-}
-PTile upper_fma(left_tile, right_tile, add_tile){
-  return tile_fma(left_tile, right_tile, add_tile, true);
 }
 
 //inf fma - fused multiply add when the first multiply term contains infinity.
@@ -50,23 +68,23 @@ void inf_fma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
     //the value rhs must be a standard, nonflipped double interval that is only on
     //one side of zero.
 
-    int _state = is_pf_negative(a->lower) * 1 + is_pf_negative(b->lower) * 2;
+    int _state = is_tile_negative(a->lower) * 1 + is_tile_negative(b->lower) * 2;
 
     PTile c_upper_proxy = issingle(c) ? c->lower : c->upper;
 
     //assign upper and lower values based on the bounds
     if (_state == 0){
-      res->lower = lower_fma(a->lower, b->lower, c->lower);
-      res->upper = upper_fma(a->upper, b->upper, c_upper_proxy);
+      res->lower = tile_fma(a->lower, b->lower, c->lower     , false);
+      res->upper = tile_fma(a->upper, b->upper, c_upper_proxy, true );
     } else if (_state == 1){
-      res->lower = lower_fma(a->upper, b->lower, c->lower);
-      res->upper = upper_fma(a->lower, b->upper, c_upper_proxy);
+      res->lower = tile_fma(a->upper, b->lower, c->lower     , false);
+      res->upper = tile_fma(a->lower, b->upper, c_upper_proxy, true );
     } else if (_state == 2){
-      res->lower = lower_fma(a->upper, b->lower, c->lower);
-      res->upper = upper_fma(a->lower, b->upper, c_upper_proxy);
+      res->lower = tile_fma(a->upper, b->lower, c->lower     , false);
+      res->upper = tile_fma(a->lower, b->upper, c_upper_proxy, true );
     } else { //if state == 3
-      res->lower = lower_fma(a->upper, b->upper, c->lower);
-      res->upper = upper_fma(a->lower, b->lower, c_upper_proxy);
+      res->lower = tile_fma(a->upper, b->upper, c->lower     , false);
+      res->upper = tile_fma(a->lower, b->lower, c_upper_proxy, true );
     }
 
     // need to check if the result has "flipped around" and now need to be
@@ -83,10 +101,10 @@ void inf_fma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
 
     PTile c_upper_proxy = issingle(c) ? c->lower : c->upper;
 
-    PTile _l1 = is_pf_inf(a->lower) | is_pf_inf(b->lower) ? __inf : lower_fma(a->lower, b->lower, c->lower);
-    PTile _l2 = is_pf_inf(a->upper) | is_pf_inf(b->upper) ? __inf : lower_fma(a->upper, b->upper, c->lower);
-    PTile _u1 = is_pf_inf(a->lower) | is_pf_inf(b->upper) ? __inf : upper_fma(a->lower, b->upper, c_upper_proxy);
-    PTile _u2 = is_pf_inf(a->upper) | is_pf_inf(b->lower) ? __inf : upper_fma(a->upper, b->lower, c_upper_proxy);
+    PTile _l1 = is_tile_inf(a->lower) | is_tile_inf(b->lower) ? __inf : tile_fma(a->lower, b->lower, c->lower,      false);
+    PTile _l2 = is_tile_inf(a->upper) | is_tile_inf(b->upper) ? __inf : tile_fma(a->upper, b->upper, c->lower,      false);
+    PTile _u1 = is_tile_inf(a->lower) | is_tile_inf(b->upper) ? __inf : tile_fma(a->lower, b->upper, c_upper_proxy, true );
+    PTile _u2 = is_tile_inf(a->upper) | is_tile_inf(b->lower) ? __inf : tile_fma(a->upper, b->lower, c_upper_proxy, true );
 
     //construct the result.
     res->lower = (__s(_l1) < __s(_l2)) ? _l1 : _l2;
@@ -104,12 +122,12 @@ void inf_fma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
 
   PTile c_upper_proxy = issingle(c) ? c->lower : c->upper;
 
-  if (is_pf_negative(b->lower)){
-    res->lower = is_pf_inf(a->upper) ? __inf : lower_fma(a->upper, b->upper, c->lower);
-    res->upper = is_pf_inf(a->lower) ? __inf : upper_fma(a->lower, b->upper, c_upper_proxy);
+  if (is_tile_negative(b->lower)){
+    res->lower = is_tile_inf(a->upper) ? __inf : tile_fma(a->upper, b->upper, c->lower,      false);
+    res->upper = is_tile_inf(a->lower) ? __inf : tile_fma(a->lower, b->upper, c_upper_proxy, true);
   } else {
-    res->lower = is_pf_inf(a->lower) ? __inf : lower_fma(a->lower, b->lower, c->lower);
-    res->upper = is_pf_inf(a->upper) ? __inf : upper_fma(a->upper, b->lower, c_upper_proxy);
+    res->lower = is_tile_inf(a->lower) ? __inf : tile_fma(a->lower, b->lower, c->lower,      false);
+    res->upper = is_tile_inf(a->upper) ? __inf : tile_fma(a->upper, b->lower, c_upper_proxy, true);
   }
 
   collapseifsingle(res);
@@ -124,16 +142,16 @@ void zero_fma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
 
   if (roundszero(b)){
     // when rhs spans zero, we have to check four possible endpoints.
-    res->lower = min(lower_fma(a->lower, b->upper, c->lower), lower_fma(a->upper, b->lower, c->lower));
-    res->upper = max(upper_fma(a->lower, b->lower, c_upper_proxy), upper_fma(a->upper, b->upper, c_upper_proxy));
-  } else if (is_pf_positive(b->lower)){
+    res->lower = min(tile_fma(a->lower, b->upper, c->lower     , false), tile_fma(a->upper, b->lower, c->lower     , false));
+    res->upper = max(tile_fma(a->lower, b->lower, c_upper_proxy, true ), tile_fma(a->upper, b->upper, c_upper_proxy, true ));
+  } else if (is_tile_positive(b->lower)){
     // in the case where the rhs doesn't span zero, we must only multiply by the
     // extremum.
-    res->lower = lower_fma(a->lower, b->upper, c->lower);
-    res->upper = upper_fma(a->upper, b->upper, c_upper_proxy);
+    res->lower = tile_fma(a->lower, b->upper, c->lower     , false);
+    res->upper = tile_fma(a->upper, b->upper, c_upper_proxy, true );
   } else {
-    res->lower = lower_fma(a->upper, b->lower, c->lower);
-    res->upper = upper_fma(a->lower, b->lower, c_upper_proxy);
+    res->lower = tile_fma(a->upper, b->lower, c->lower     , false);
+    res->upper = tile_fma(a->lower, b->lower, c_upper_proxy, true );
   }
 
   collapseifsingle(res);
@@ -142,13 +160,13 @@ void zero_fma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
 void std_fma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
   res->state = STDBOUND;
   // decide if the multiplication result will be positive or negative.
-  bool mul_res_sign = is_pf_negative(a->lower) ^ is_pf_negative(b->lower);
+  bool mul_res_sign = is_tile_negative(a->lower) ^ is_tile_negative(b->lower);
   //if the result is negative, the lower value will be the outer values for both
   //if the result is positive, the lower value will result from the inner values for both.
-  PTile a_lower_component = ((mul_res_sign ^ is_pf_negative(a->lower)) != 0) ? (a->upper) : (a->lower);
-  PTile a_upper_component = ((mul_res_sign ^ is_pf_negative(a->lower)) != 0) ? (a->lower) : (a->upper);
-  PTile b_lower_component = ((mul_res_sign ^ is_pf_negative(b->lower)) != 0) ? (b->upper) : (b->lower);
-  PTile b_upper_component = ((mul_res_sign ^ is_pf_negative(b->lower)) != 0) ? (b->lower) : (b->upper);
+  PTile a_lower_component = ((mul_res_sign ^ is_tile_negative(a->lower)) != 0) ? (a->upper) : (a->lower);
+  PTile a_upper_component = ((mul_res_sign ^ is_tile_negative(a->lower)) != 0) ? (a->lower) : (a->upper);
+  PTile b_lower_component = ((mul_res_sign ^ is_tile_negative(b->lower)) != 0) ? (b->upper) : (b->lower);
+  PTile b_upper_component = ((mul_res_sign ^ is_tile_negative(b->lower)) != 0) ? (b->lower) : (b->upper);
 
   PTile c_upper_proxy = issingle(c) ? c->lower : c->upper;
 

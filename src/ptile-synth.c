@@ -26,7 +26,7 @@ long long pf_epoch(PTile value){
 }
 
 unsigned long long pf_lattice(PTile value){
-  bool flipsign = is_pf_negative(value) ^ is_pf_inverted(value);
+  bool flipsign = is_tile_negative(value) ^ is_tile_inverted(value);
   long long temp = __s(value) * (flipsign ? -1 : 1);
   long long mask = (1 << PENV->latticebits) - 1;
   return ((temp) >> (63 - PENV->epochbits - PENV->latticebits)) & mask;

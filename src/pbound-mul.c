@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 static bool __resultparity(PTile lhs, PTile rhs){
-  return is_pf_negative(lhs) ^ is_pf_negative(rhs);
+  return is_tile_negative(lhs) ^ is_tile_negative(rhs);
 }
 
 //for now, let's make this output single.
@@ -28,22 +28,22 @@ void exact_arithmetic_multiplication(PBound *dest, PTile lhs, PTile rhs){
   }
 
   //check for sign issues.
-  bool res_sign = is_pf_negative(lhs) ^ is_pf_negative(rhs);
-  set_single(dest, pf_synth(res_sign, is_pf_inverted(lhs), res_epoch, res_lattice));
+  bool res_sign = is_tile_negative(lhs) ^ is_tile_negative(rhs);
+  set_single(dest, pf_synth(res_sign, is_tile_inverted(lhs), res_epoch, res_lattice));
   return;
 }
 
 
 static void pf_exact_mul(PBound *dest, PTile lhs, PTile rhs){
   //this needs to be here to avoid parity tests causing strange results.
-  if (is_pf_inf(lhs) || is_pf_inf(rhs)) {set_inf(dest); return;}
-  if (is_pf_zero(lhs) || is_pf_zero(rhs)) {set_zero(dest); return;}
+  if (is_tile_inf(lhs) || is_tile_inf(rhs)) {set_inf(dest); return;}
+  if (is_tile_zero(lhs) || is_tile_zero(rhs)) {set_zero(dest); return;}
   if (lhs == __one) {set_single(dest, rhs); return;}
   if (rhs == __one) {set_single(dest, lhs); return;}
   if (lhs == (__one | __inf)) {set_single(dest, tile_additiveinverse(rhs)); return;}
   if (rhs == (__one | __inf)) {set_single(dest, tile_additiveinverse(lhs)); return;}
 
-  if (is_pf_inverted(lhs) ^ is_pf_inverted(rhs)){
+  if (is_tile_inverted(lhs) ^ is_tile_inverted(rhs)){
     exact_arithmetic_division(dest, lhs, tile_multiplicativeinverse(rhs));
   } else {
     exact_arithmetic_multiplication(dest, lhs, rhs);
@@ -56,27 +56,27 @@ static void pf_exact_mul(PBound *dest, PTile lhs, PTile rhs){
 static PTile pf_inexact_mul_outer(PTile lhs, PTile rhs){
 
   //calculate proper outer bounds.
-  PTile _outer_lhs = is_pf_positive(lhs) ? lub(lhs) : glb(lhs);
-  PTile _outer_rhs = is_pf_positive(rhs) ? lub(rhs) : glb(rhs);
+  PTile _outer_lhs = is_tile_positive(lhs) ? lub(lhs) : glb(lhs);
+  PTile _outer_rhs = is_tile_positive(rhs) ? lub(rhs) : glb(rhs);
 
   //create a temporary PBound to hold the prospective value.
   PBound res_temp = __EMPTYBOUND;
   pf_exact_mul(&res_temp, _outer_lhs, _outer_rhs);
   if (issingle(&res_temp)) {return res_temp.lower;};
-  return is_pf_positive(res_temp.lower) ? res_temp.upper : res_temp.lower;
+  return is_tile_positive(res_temp.lower) ? res_temp.upper : res_temp.lower;
 }
 
 static PTile pf_inexact_mul_inner(PTile lhs, PTile rhs){
 
-  PTile _inner_lhs = is_pf_positive(lhs) ? glb(lhs) : lub(lhs);
-  PTile _inner_rhs = is_pf_positive(rhs) ? glb(rhs) : lub(rhs);
+  PTile _inner_lhs = is_tile_positive(lhs) ? glb(lhs) : lub(lhs);
+  PTile _inner_rhs = is_tile_positive(rhs) ? glb(rhs) : lub(rhs);
 
   //create a temporary PBound to hold the prospective value.
   PBound res_temp = __EMPTYBOUND;
   pf_exact_mul(&res_temp, _inner_lhs, _inner_rhs);
 
   if (issingle(&res_temp)) {return res_temp.lower;};
-  return is_pf_negative(res_temp.lower) ? res_temp.upper : res_temp.lower;
+  return is_tile_negative(res_temp.lower) ? res_temp.upper : res_temp.lower;
 }
 
 static PTile pf_inexact_mul_lower(PTile lhs, PTile rhs){
@@ -101,8 +101,8 @@ static void mul_pf_single(PBound *dest, PTile lhs, PTile rhs)
   //////////////////////////////////////////////////////////////////////////////
   // check all zero and inf cases.
 
-  if (is_pf_inf(rhs)){
-    if (is_pf_zero(lhs)) {
+  if (is_tile_inf(rhs)){
+    if (is_tile_zero(lhs)) {
       set_allreals(dest);
     } else {
       set_inf(dest);
@@ -110,8 +110,8 @@ static void mul_pf_single(PBound *dest, PTile lhs, PTile rhs)
     return;
   }
 
-  if (is_pf_zero(rhs)){
-    if (is_pf_inf(lhs)) {
+  if (is_tile_zero(rhs)){
+    if (is_tile_inf(lhs)) {
       set_allreals(dest);
     } else {
       set_zero(dest);
@@ -119,12 +119,12 @@ static void mul_pf_single(PBound *dest, PTile lhs, PTile rhs)
     return;
   }
 
-  if (is_pf_inf(lhs)) {set_inf(dest); return;}
-  if (is_pf_zero(lhs)) {set_zero(dest); return;}
+  if (is_tile_inf(lhs)) {set_inf(dest); return;}
+  if (is_tile_zero(lhs)) {set_zero(dest); return;}
 
   //////////////////////////////////////////////////////////////////////////////
 
-  if (is_pf_exact(lhs) && is_pf_exact(rhs)){
+  if (is_tile_exact(lhs) && is_tile_exact(rhs)){
     pf_exact_mul(dest, lhs, rhs);
   }else{
     pf_inexact_mul(dest, lhs, rhs);
@@ -162,7 +162,7 @@ static void single_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
     mul_pf_single(dest, lhs->lower, rhs->lower);
   } else {
 
-    if (is_pf_inf(lhs->lower)){
+    if (is_tile_inf(lhs->lower)){
       if (roundszero(rhs)){
         set_allreals(dest);
       } else {
@@ -171,7 +171,7 @@ static void single_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
       return;
     }
 
-    if (is_pf_zero(lhs->lower)){
+    if (is_tile_zero(lhs->lower)){
       if (roundsinf(rhs)){
         set_allreals(dest);
       } else {
@@ -180,7 +180,7 @@ static void single_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
       return;
     }
 
-    bool lhs_neg = is_pf_negative(lhs->lower);
+    bool lhs_neg = is_tile_negative(lhs->lower);
     PTile lhs_proxy = lhs_neg ? tile_additiveinverse(lhs->lower) : lhs->lower;
 
     dest->state = STDBOUND;
@@ -203,7 +203,7 @@ int muldiv_index(long long lattice1, long long lattice2){
 
 static void inf_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
 {
-  if (roundszero(rhs) || is_pf_zero(rhs->lower) || is_pf_zero(rhs->upper)) {
+  if (roundszero(rhs) || is_tile_zero(rhs->lower) || is_tile_zero(rhs->upper)) {
     //the case where the right hand side hits zero:
     set_allreals(dest);
     return;

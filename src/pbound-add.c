@@ -25,7 +25,7 @@ static PTile exact_arithmetic_addition_crossed(PTile lhs, PTile rhs){
   unsigned long long res_lattice;
   unsigned long long lhs_lattice = pf_lattice(lhs);
   unsigned long long rhs_lattice = pf_lattice(rhs);
-  bool res_negative = is_pf_negative(lhs);
+  bool res_negative = is_tile_negative(lhs);
   int table = pf_epoch(rhs) + res_epoch;
 
   if (table < PENV->table_counts[__ADD_CROSSED_TABLE]){
@@ -44,8 +44,8 @@ static PTile exact_arithmetic_addition_inverted(PTile lhs, PTile rhs){
   unsigned long long res_lattice;
   unsigned long long lhs_lattice = pf_lattice(lhs);
   unsigned long long rhs_lattice = pf_lattice(rhs);
-  bool res_negative = is_pf_negative(lhs);
-  bool res_inverted = is_pf_inverted(lhs);
+  bool res_negative = is_tile_negative(lhs);
+  bool res_inverted = is_tile_inverted(lhs);
   int table = pf_epoch(rhs) - res_epoch;
   int index = table_addsub_index(table, lhs_lattice, rhs_lattice);
 
@@ -76,7 +76,7 @@ static PTile exact_arithmetic_addition_uninverted(PTile lhs, PTile rhs){
   unsigned long long res_lattice;
   unsigned long long lhs_lattice = pf_lattice(lhs);
   unsigned long long rhs_lattice = pf_lattice(rhs);
-  bool res_negative = is_pf_negative(lhs);
+  bool res_negative = is_tile_negative(lhs);
   int table = res_epoch - pf_epoch(rhs);
 
   if (table < PENV->table_counts[__ADD_TABLE]){
@@ -92,14 +92,14 @@ static PTile exact_arithmetic_addition_uninverted(PTile lhs, PTile rhs){
 static PTile exact_arithmetic_addition(PTile lhs, PTile rhs){
   //swap the order of the two terms to make sure that the outer float appears
   //first.
-  bool orderswap = is_pf_negative(lhs) ^ (__s(lhs) < __s(rhs));
+  bool orderswap = is_tile_negative(lhs) ^ (__s(lhs) < __s(rhs));
 
   PTile outer = orderswap ? rhs : lhs;
   PTile inner = orderswap ? lhs : rhs;
 
-  if (is_pf_inverted(outer) ^ is_pf_inverted(inner)) {
+  if (is_tile_inverted(outer) ^ is_tile_inverted(inner)) {
     return exact_arithmetic_addition_crossed(outer, inner);
-  } else if (is_pf_inverted(outer)) {
+  } else if (is_tile_inverted(outer)) {
     return exact_arithmetic_addition_inverted(outer, inner);
   } else {
     return exact_arithmetic_addition_uninverted(outer, inner);
@@ -109,12 +109,12 @@ static PTile exact_arithmetic_addition(PTile lhs, PTile rhs){
 static PTile pf_exact_add(PTile lhs, PTile rhs){
 
   //redo the checks on this in case we've been passed from inexact_add.
-  if (is_pf_inf(lhs))  {return __inf;}
-  if (is_pf_inf(rhs))  {return __inf;}
-  if (is_pf_zero(lhs)) {return rhs;}
-  if (is_pf_zero(rhs)) {return lhs;}
+  if (is_tile_inf(lhs))  {return __inf;}
+  if (is_tile_inf(rhs))  {return __inf;}
+  if (is_tile_zero(lhs)) {return rhs;}
+  if (is_tile_zero(rhs)) {return lhs;}
 
-  if (is_pf_negative(lhs) ^ is_pf_negative(rhs)){
+  if (is_tile_negative(lhs) ^ is_tile_negative(rhs)){
     return exact_arithmetic_subtraction(lhs, tile_additiveinverse(rhs));
   } else {
     return exact_arithmetic_addition(lhs, rhs);
@@ -129,12 +129,12 @@ static PTile pf_inexact_add(PTile lhs, PTile rhs, bool upper){
 }
 
 PTile tile_add(PTile lhs, PTile rhs, bool upper){
-  if (is_pf_inf(lhs)) {return __inf;}
-  if (is_pf_inf(rhs)) {return __inf;}
-  if (is_pf_zero(lhs)) {return rhs;}
-  if (is_pf_zero(rhs)) {return lhs;}
+  if (is_tile_inf(lhs)) {return __inf;}
+  if (is_tile_inf(rhs)) {return __inf;}
+  if (is_tile_zero(lhs)) {return rhs;}
+  if (is_tile_zero(rhs)) {return lhs;}
 
-  if (is_pf_exact(lhs) && is_pf_exact(rhs)) {
+  if (is_tile_exact(lhs) && is_tile_exact(rhs)) {
     return pf_exact_add(lhs, rhs);
   } else {
     return pf_inexact_add(lhs, rhs, upper);

@@ -6,13 +6,13 @@ typedef unsigned long long PTile;
 ////////////////////////////////////////////////////////////////////////////////
 // Properties of PTiles
 
-bool is_pf_positive(PTile x);
-bool is_pf_negative(PTile x);
-bool is_pf_inverted(PTile x);
-bool is_pf_exact(PTile x);
-bool is_pf_ulp(PTile x);
-bool is_pf_inf(PTile x);
-bool is_pf_zero(PTile x);
+bool is_tile_positive(PTile x);
+bool is_tile_negative(PTile x);
+bool is_tile_inverted(PTile x);
+bool is_tile_exact(PTile x);
+bool is_tile_ulp(PTile x);
+bool is_tile_inf(PTile x);
+bool is_tile_zero(PTile x);
 
 ////////////////////////////////////////////////////////////////////////////////
 // iteration tools
