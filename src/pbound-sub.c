@@ -3,8 +3,6 @@
 #include "../include/ptile.h"
 #include <stdio.h>
 
-extern const verbose;
-
 void sub(PBound *dest, const PBound *lhs, const PBound *rhs){
   //allocate on the stack the rhs value, invert it, then add.
   PBound r_inv = __EMPTYBOUND;
@@ -13,7 +11,7 @@ void sub(PBound *dest, const PBound *lhs, const PBound *rhs){
   sub(dest, lhs, &r_inv);
 }
 
-static void exact_arithmetic_subtraction_uninverted(PBound * dest, PTile lhs, PTile rhs){
+static PTile exact_arithmetic_subtraction_uninverted(PTile lhs, PTile rhs){
   bool res_negative = is_pf_negative(lhs);
   bool res_inverted = false;
   long long res_epoch;
@@ -23,7 +21,6 @@ static void exact_arithmetic_subtraction_uninverted(PBound * dest, PTile lhs, PT
   unsigned long long lhs_lattice = pf_lattice(lhs);
   unsigned long long rhs_lattice = pf_lattice(rhs);
 
-  if (verbose) {printf("----\nentering uninverted subtraction\n");}
   //figure out the table delta.
 
   //ascertain the table that we'll need to look up.
@@ -34,8 +31,7 @@ static void exact_arithmetic_subtraction_uninverted(PBound * dest, PTile lhs, PT
     res_lattice = (PENV->tables[__SUB_TABLE])[lookup_index];
     res_epoch = lhs_epoch - (PENV->tables[__SUB_EPOCH_TABLE])[lookup_index];
   } else {
-    set_single(dest, res_negative ? next(lhs) : prev(lhs));
-    return;
+    return (res_negative ? next(lhs) : prev(lhs));
   }
 
   if (res_epoch < 0){
@@ -44,10 +40,10 @@ static void exact_arithmetic_subtraction_uninverted(PBound * dest, PTile lhs, PT
     res_lattice = (PENV->tables[__INVERTED_SUB_TABLE])[lookup_index];
   }
 
-  set_single(dest, pf_synth(res_negative, res_inverted, res_epoch, res_lattice));
+  return pf_synth(res_negative, res_inverted, res_epoch, res_lattice);
 }
 
-static void exact_arithmetic_subtraction_inverted(PBound * dest, PTile lhs, PTile rhs){
+static PTile exact_arithmetic_subtraction_inverted(PTile lhs, PTile rhs){
   bool res_negative = is_pf_negative(lhs);
   long long res_epoch;
   long long rhs_epoch = pf_epoch(rhs);
@@ -56,8 +52,6 @@ static void exact_arithmetic_subtraction_inverted(PBound * dest, PTile lhs, PTil
   unsigned long long lhs_lattice = pf_lattice(lhs);
   unsigned long long rhs_lattice = pf_lattice(rhs);
 
-  if (verbose) {printf("----\nentering inverted subtraction\n");}
-
   //ascertain the table that we'll need to look up.
   int table = rhs_epoch - lhs_epoch;
 
@@ -65,14 +59,13 @@ static void exact_arithmetic_subtraction_inverted(PBound * dest, PTile lhs, PTil
     res_lattice = (PENV->tables[__SUB_INVERTED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
     res_epoch = lhs_epoch + (PENV->tables[__SUB_INVERTED_EPOCH_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
   } else {
-    set_single(dest, res_negative ? next(lhs) : prev(lhs));
-    return;
+    return (res_negative ? next(lhs) : prev(lhs));
   }
 
-  set_single(dest, pf_synth(res_negative, true, res_epoch, res_lattice));
+  return pf_synth(res_negative, true, res_epoch, res_lattice);
 }
 
-static void exact_arithmetic_subtraction_crossed(PBound *dest, PTile lhs, PTile rhs){
+static PTile exact_arithmetic_subtraction_crossed(PTile lhs, PTile rhs){
   bool res_negative = is_pf_negative(lhs);
   bool res_inverted = false;
   long long res_epoch;
@@ -82,8 +75,6 @@ static void exact_arithmetic_subtraction_crossed(PBound *dest, PTile lhs, PTile 
   unsigned long long lhs_lattice = pf_lattice(lhs);
   unsigned long long rhs_lattice = pf_lattice(rhs);
 
-  if (verbose) {printf("----\nentering crossed subtraction\n");}
-
   //ascertain the table that we'll need to look up.
   int table = rhs_epoch + lhs_epoch;
 
@@ -91,8 +82,7 @@ static void exact_arithmetic_subtraction_crossed(PBound *dest, PTile lhs, PTile 
     res_lattice = (PENV->tables[__SUB_CROSSED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
     res_epoch = lhs_epoch - (PENV->tables[__SUB_CROSSED_EPOCH_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
   } else {
-    set_single(dest, res_negative ? next(lhs) : prev(lhs));
-    return;
+    return (res_negative ? next(lhs) : prev(lhs));
   }
 
   if (res_epoch < 0){
@@ -101,12 +91,12 @@ static void exact_arithmetic_subtraction_crossed(PBound *dest, PTile lhs, PTile 
     res_lattice = (PENV->tables[__INVERTED_SUB_CROSSED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
   }
 
-  set_single(dest, pf_synth(res_negative, res_inverted, res_epoch, res_lattice));
+  return pf_synth(res_negative, res_inverted, res_epoch, res_lattice);
 }
 
-void exact_arithmetic_subtraction(PBound *dest, PTile lhs, PTile rhs){
+PTile exact_arithmetic_subtraction(PTile lhs, PTile rhs){
   //check to see if they're equal.
-  if (lhs == rhs) {set_zero(dest); return;}
+  if (lhs == rhs) {return __zero;}
 
   //the numbers should have the same sign.  But we should order them so that the
   //first one is outer, and the second one is inner.
@@ -115,14 +105,15 @@ void exact_arithmetic_subtraction(PBound *dest, PTile lhs, PTile rhs){
 
   PTile outer = signswap ? rhs : lhs;
   PTile inner = signswap ? lhs : rhs;
+  PTile temp;
 
   if (is_pf_inverted(outer) ^ is_pf_inverted(inner)) {
-    exact_arithmetic_subtraction_crossed(dest, outer, inner);
+    temp = exact_arithmetic_subtraction_crossed(outer, inner);
   } else if (is_pf_inverted(outer)) {
-    exact_arithmetic_subtraction_inverted(dest, outer, inner);
+    temp = exact_arithmetic_subtraction_inverted(outer, inner);
   } else {
-    exact_arithmetic_subtraction_uninverted(dest, outer, inner);
+    temp = exact_arithmetic_subtraction_uninverted(outer, inner);
   }
 
-  if (signswap) {additiveinverse(dest);}
+  return (signswap) ? pf_additiveinverse(temp) : temp;
 }

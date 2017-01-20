@@ -3,16 +3,12 @@
 #include "../include/ptile.h"
 #include <stdio.h>
 
-extern const verbose;
-
 static bool __resultparity(PTile lhs, PTile rhs){
   return is_pf_negative(lhs) ^ is_pf_negative(rhs);
 }
 
 //for now, let's make this output single.
 void exact_arithmetic_multiplication(PBound *dest, PTile lhs, PTile rhs){
-
-  if (verbose) {printf("entering exact arithmetic multipication\n");}
 
   long long res_epoch = pf_epoch(lhs) + pf_epoch(rhs);
   unsigned long long lhs_lattice = pf_lattice(lhs);

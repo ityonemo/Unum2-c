@@ -21,8 +21,6 @@ unsigned long long invert(unsigned long long value){
 
 void exact_arithmetic_division(PBound *dest, PTile lhs, PTile rhs)
 {
-  if (verbose) {printf("entering exact arithmetic division \n");}
-
   bool res_sign = is_pf_negative(lhs) ^ is_pf_negative(rhs);
   unsigned long long lhs_lattice = pf_lattice(lhs);
   unsigned long long rhs_lattice = pf_lattice(rhs);
