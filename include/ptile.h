@@ -32,8 +32,10 @@ unsigned long long pf_lattice(PTile value);
 
 ////////////////////////////////////////////////////////////////////////////////
 // math tools
-PTile pf_additiveinverse(PTile val);
-PTile pf_multiplicativeinverse(PTile val);
+PTile tile_additiveinverse(PTile val);
+PTile tile_multiplicativeinverse(PTile val);
+
+PTile tile_add(PTile lhs, PTile rhs, bool upper);
 
 ////////////////////////////////////////////////////////////////////////////////
 // SPECIAL DEFINES

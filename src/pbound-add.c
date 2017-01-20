@@ -115,7 +115,7 @@ static PTile pf_exact_add(PTile lhs, PTile rhs){
   if (is_pf_zero(rhs)) {return lhs;}
 
   if (is_pf_negative(lhs) ^ is_pf_negative(rhs)){
-    return exact_arithmetic_subtraction(lhs, pf_additiveinverse(rhs));
+    return exact_arithmetic_subtraction(lhs, tile_additiveinverse(rhs));
   } else {
     return exact_arithmetic_addition(lhs, rhs);
   }
@@ -128,7 +128,7 @@ static PTile pf_inexact_add(PTile lhs, PTile rhs, bool upper){
     return upper_ulp(pf_exact_add(glb(lhs), glb(rhs)));
 }
 
-static PTile pf_add(PTile lhs, PTile rhs, bool upper){
+PTile tile_add(PTile lhs, PTile rhs, bool upper){
   if (is_pf_inf(lhs)) {return __inf;}
   if (is_pf_inf(rhs)) {return __inf;}
   if (is_pf_zero(lhs)) {return rhs;}
@@ -151,8 +151,8 @@ void add(PBound *dest, const PBound *lhs, const PBound *rhs){
     //TODO: contemplate adding an exactitude check here.
     dest->state = STDBOUND;
 
-    dest->lower = pf_add(lhs->lower, rhs->lower, false);
-    dest->upper = pf_add(lhs->lower, rhs->lower, true);
+    dest->lower = tile_add(lhs->lower, rhs->lower, false);
+    dest->upper = tile_add(lhs->lower, rhs->lower, true);
 
     collapseifsingle(dest);
 

@@ -66,6 +66,10 @@ bool in(const PBound *lhs, const PBound *rhs);  //rhs contains lhs
 bool ol(const PBound *lhs, const PBound *rhs);  //lhs and rhs overlap
 
 ////////////////////////////////////////////////////////////////////////////////
+// tile arithmetic functions
+
+
+////////////////////////////////////////////////////////////////////////////////
 // ARITHMETIC functions
 
 void add(PBound *dest, const PBound *lhs, const PBound *rhs);

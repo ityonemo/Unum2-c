@@ -14,8 +14,8 @@ PTile pf_synth(bool negative, bool inverted, long long epoch, unsigned long long
   }
 
   PTile temp = __p(((epoch << PENV->latticebits | lattice) * (PENV->increment)) | __one);
-  if (inverted) {temp = pf_multiplicativeinverse(temp);};
-  if (negative) {temp = pf_additiveinverse(temp);};
+  if (inverted) {temp = tile_multiplicativeinverse(temp);};
+  if (negative) {temp = tile_additiveinverse(temp);};
   return temp;
 }
 

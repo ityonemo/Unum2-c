@@ -2,10 +2,10 @@
 #include "../include/pbound.h"
 #include "../include/ptile.h"
 
-PTile pf_additiveinverse(PTile value){
+PTile tile_additiveinverse(PTile value){
   return __p(-__s(value));
 }
 
-PTile pf_multiplicativeinverse(PTile value){
+PTile tile_multiplicativeinverse(PTile value){
   return __p(-__s(value) + __inf);
 }

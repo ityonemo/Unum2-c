@@ -5,11 +5,11 @@ void additiveinverse(PBound *v){
   PTile temp;
   switch (v->state){
     case SINGLETON:
-      v->lower = pf_additiveinverse(v->lower);
+      v->lower = tile_additiveinverse(v->lower);
     break;
     case STDBOUND:
-      temp = pf_additiveinverse(v->lower);
-      v->lower = pf_additiveinverse(v->upper);
+      temp = tile_additiveinverse(v->lower);
+      v->lower = tile_additiveinverse(v->upper);
       v->upper = temp;
     break;
     default:
@@ -21,11 +21,11 @@ void multiplicativeinverse(PBound *v){
   PTile temp;
   switch (v->state){
     case SINGLETON:
-      v->lower = pf_multiplicativeinverse(v->lower);
+      v->lower = tile_multiplicativeinverse(v->lower);
     break;
     case STDBOUND:
-      temp = pf_multiplicativeinverse(v->lower);
-      v->lower = pf_multiplicativeinverse(v->upper);
+      temp = tile_multiplicativeinverse(v->lower);
+      v->lower = tile_multiplicativeinverse(v->upper);
       v->upper = temp;
     break;
     default:

@@ -40,11 +40,11 @@ static void pf_exact_mul(PBound *dest, PTile lhs, PTile rhs){
   if (is_pf_zero(lhs) || is_pf_zero(rhs)) {set_zero(dest); return;}
   if (lhs == __one) {set_single(dest, rhs); return;}
   if (rhs == __one) {set_single(dest, lhs); return;}
-  if (lhs == (__one | __inf)) {set_single(dest, pf_additiveinverse(rhs)); return;}
-  if (rhs == (__one | __inf)) {set_single(dest, pf_additiveinverse(lhs)); return;}
+  if (lhs == (__one | __inf)) {set_single(dest, tile_additiveinverse(rhs)); return;}
+  if (rhs == (__one | __inf)) {set_single(dest, tile_additiveinverse(lhs)); return;}
 
   if (is_pf_inverted(lhs) ^ is_pf_inverted(rhs)){
-    exact_arithmetic_division(dest, lhs, pf_multiplicativeinverse(rhs));
+    exact_arithmetic_division(dest, lhs, tile_multiplicativeinverse(rhs));
   } else {
     exact_arithmetic_multiplication(dest, lhs, rhs);
   }
@@ -181,7 +181,7 @@ static void single_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
     }
 
     bool lhs_neg = is_pf_negative(lhs->lower);
-    PTile lhs_proxy = lhs_neg ? pf_additiveinverse(lhs->lower) : lhs->lower;
+    PTile lhs_proxy = lhs_neg ? tile_additiveinverse(lhs->lower) : lhs->lower;
 
     dest->state = STDBOUND;
     mul_lower(dest, rhs->lower, lhs_proxy);
@@ -332,10 +332,10 @@ void mul(PBound *dest, const PBound *lhs, const PBound *rhs){
   bool lhs_neg = isnegative(lhs);
   bool rhs_neg = isnegative(rhs);
 
-  PTile lhs_lower_proxy = lhs_neg ? pf_additiveinverse(lhs->upper) : lhs->lower;
-  PTile lhs_upper_proxy = lhs_neg ? pf_additiveinverse(lhs->lower) : lhs->upper;
-  PTile rhs_lower_proxy = rhs_neg ? pf_additiveinverse(rhs->upper) : rhs->lower;
-  PTile rhs_upper_proxy = rhs_neg ? pf_additiveinverse(rhs->lower) : rhs->upper;
+  PTile lhs_lower_proxy = lhs_neg ? tile_additiveinverse(lhs->upper) : lhs->lower;
+  PTile lhs_upper_proxy = lhs_neg ? tile_additiveinverse(lhs->lower) : lhs->upper;
+  PTile rhs_lower_proxy = rhs_neg ? tile_additiveinverse(rhs->upper) : rhs->lower;
+  PTile rhs_upper_proxy = rhs_neg ? tile_additiveinverse(rhs->lower) : rhs->upper;
 
   //presume our result is going to be a beautiful standard bound (may have to collapse.)
   dest->state = STDBOUND;

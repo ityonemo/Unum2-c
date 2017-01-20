@@ -115,5 +115,5 @@ PTile exact_arithmetic_subtraction(PTile lhs, PTile rhs){
     temp = exact_arithmetic_subtraction_uninverted(outer, inner);
   }
 
-  return (signswap) ? pf_additiveinverse(temp) : temp;
+  return (signswap) ? tile_additiveinverse(temp) : temp;
 }
