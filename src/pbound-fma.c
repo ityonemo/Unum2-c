@@ -2,36 +2,115 @@
 #include "../include/pbound.h"
 #include "../include/ptile.h"
 #include <stdio.h>
-/*
+
+//a couple of helper functions that we'll need.
+
+static void dc_lvdn(__dc_tile *value){
+  if (value->lattice == 0){
+    if (value->epoch == 0){
+      value->lattice = 1;
+      value->inverted = !value->inverted;
+    } else {
+      value->lattice = (1 << PENV->latticebits) - 1;
+      value->epoch -= 1;
+    }
+  } else {
+    value->lattice -= 1;
+  }
+}
+
+static void dc_lvup(__dc_tile * value){
+  unsigned long long max_lattice = (1 << PENV->latticebits) - 1;
+  if (value->lattice == max_lattice){
+    value->lattice = 0;
+    value->epoch += 1;
+  } else {
+    value->lattice += 1;
+  }
+}
+
+static void dc_lub(__dc_tile *value) {
+  if ((value->lattice % 2) != 0) {
+    if (value->negative ^ value->inverted) {
+      dc_lvup(value);
+    } else {
+      value->lattice -= 1;
+    }
+  }
+}
+
+static void dc_glb(__dc_tile *value){
+  if ((value->lattice % 2) != 0) {
+    if (value->negative ^ value->inverted) {
+      value->lattice -= 1;
+    } else {
+      dc_lvup(value);
+    }
+  }
+}
+
+static bool dc_is_additive_inverse(__dc_tile *a, __dc_tile *b){
+  if (a->negative == b->negative) {return false;}
+  if (a->inverted != b->inverted) {return false;}
+  if (a->epoch != b->epoch)       {return false;}
+  if (a->lattice != b->lattice)   {return false;}
+  return true;
+}
+
+static void dc_lower_ulp(__dc_tile *value){
+  if ((value->lattice % 2) == 0){
+    if (value->negative ^ value->inverted) {
+      value->lattice += 1;
+    } else {
+      dc_lvdn(value);
+    }
+  }
+}
+
+static void dc_upper_ulp(__dc_tile *value) {
+  if ((value->lattice % 2) == 0){
+    if (value->negative ^ value->inverted) {
+      dc_lvdn(value);
+    } else {
+      value->lattice += 1;
+    }
+  }
+}
+
 
 PTile exact_fma(PTile a, PTile b, PTile c, bool upper){
 
   //put onto a stack a decomposed result placeholder.
-  dc_tile dc_result;
+  __dc_tile dc_result;
 
-  dc_mul(&dc_result, a, b)
+  dc_mul(&dc_result, a, b);
+
+  DECOMPOSE(c)
 
   //next check to see if the result is exact.
 
   if (dc_result.lattice % 2 == 0){
-    //next check to see if they are additive inverses.
-    if (dc_is_additive_inverse(&dc_result, c)) { return __zero;}
+    //consider swapping the values.
 
-    dc_add(&dc_result, c)
+    //next check to see if they are additive inverses.
+    if (dc_is_additive_inverse(&dc_result, &c_dc)) { return __zero;}
+
+    return dc_arithmetic_addition(&dc_result, &c_dc);
+
   } else if (upper) {
-    dc_lub(&dc_result)
-    if (dc_is_additive_inverse(&dc_result, c)) { return __nfew;}
-    dc_add(&dc_result, c)
-    dc_lower_ulp(&dc_result)
+    dc_lub(&dc_result);
+    if (dc_is_additive_inverse(&dc_result, &c_dc)) { return __nfew;}
+    dc_arithmetic_addition(&dc_result, &c_dc);
+    dc_lower_ulp(&dc_result);
 
   } else {
-    dc_glb(&dc_result)
-    if (dc_is_additive_inverse(&dc_result, c)) { return __few;}
-    dc_add(&dc_result, c)
-    dc_upper_ulp(&dc_result)
+    dc_glb(&dc_result);
+    if (dc_is_additive_inverse(&dc_result, &c_dc)) { return __few;}
+    dc_arithmetic_addition(&dc_result, &c_dc);
+    dc_upper_ulp(&dc_result);
   }
 
-  return pf_synth(dc_result->negative, dc_result->inverted, dc_result->epoch, dc_result->lattice)
+  return tile_synth(&dc_result);
 }
 
 PTile inexact_fma(PTile a, PTile b, PTile c, bool upper){
@@ -229,4 +308,3 @@ void pfma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
   else if (roundszero(b)) {zero_fma(res, b, a, c);}
   else                    {std_fma(res, b, a, c);}
 }
-*/
