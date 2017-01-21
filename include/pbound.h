@@ -89,7 +89,7 @@ unsigned long long invert(unsigned long long value);
 int muldiv_index(long long lhs_lattice, long long rhs_lattice);
 void dc_mul(__dc_tile *mul_result, PTile lhs, PTile rhs);
 /* pbound-sub.c: */
-PTile exact_arithmetic_subtraction(PTile lhs, PTile rhs);
+PTile dc_arithmetic_subtraction(__dc_tile *outer, __dc_tile *inner);
 
 
 ////////////////////////////////////////////////////////////////////////////////

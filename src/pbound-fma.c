@@ -4,47 +4,6 @@
 #include <stdio.h>
 /*
 
-////////////////////////////////////////////////////////////////////////////////
-// DECOMPOSED ADD/SUB FUNCTIONS
-
-
-
-//the numbers should have the same sign.  But we should order them so that the
-//first one is outer, and the second one is inner.
-
-static void dc_arithmetic_subtraction(__dc_tile *sub_result, PTile rhs){
-  bool signswap = (sub_result->negative) ^ (dc_less(sub_result, rhs));
-
-  PTile outer = signswap ? rhs : lhs;
-  PTile inner = signswap ? lhs : rhs;
-  PTile temp;
-
-  if (is_tile_inverted(outer) ^ is_tile_inverted(inner)) {
-    temp = exact_arithmetic_subtraction_crossed(outer, inner);
-  } else if (is_tile_inverted(outer)) {
-    temp = exact_arithmetic_subtraction_inverted(outer, inner);
-  } else {
-    temp = exact_arithmetic_subtraction_uninverted(outer, inner);
-  }
-
-  sub_result->negative = (signswap) ^ sub_result->negative;
-}
-
-
-
-
-
-
-
-
-static void dc_add(__dc_tile *add_result, PTile rhs){
-  if ((add_result->negative) ^ is_tile_negative(rhs)){
-    dc_arithmetic_subtraction(add_result, tile_additiveinverse(rhs));
-  } else {
-    dc_arithmetic_addition(add_result, rhs);
-  }
-}
-
 PTile exact_fma(PTile a, PTile b, PTile c, bool upper){
 
   //put onto a stack a decomposed result placeholder.

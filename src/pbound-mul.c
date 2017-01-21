@@ -3,7 +3,6 @@
 #include "../include/ptile.h"
 #include <stdio.h>
 
-
 static bool __resultparity(PTile lhs, PTile rhs) {return is_tile_negative(lhs) ^ is_tile_negative(rhs);}
 
 static void dc_arithmetic_multiplication(__dc_tile *mul_result, PTile lhs, PTile rhs){

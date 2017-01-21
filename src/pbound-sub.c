@@ -11,109 +11,70 @@ void sub(PBound *dest, const PBound *lhs, const PBound *rhs){
   sub(dest, lhs, &r_inv);
 }
 
-static PTile exact_arithmetic_subtraction_uninverted(PTile lhs, PTile rhs){
-  bool res_negative = is_tile_negative(lhs);
-  bool res_inverted = false;
-  long long res_epoch;
-  long long rhs_epoch = tile_epoch(rhs);
-  long long lhs_epoch = tile_epoch(lhs);
-  unsigned long long res_lattice;
-  unsigned long long lhs_lattice = tile_lattice(lhs);
-  unsigned long long rhs_lattice = tile_lattice(rhs);
-
-  //figure out the table delta.
-
+static PTile exact_arithmetic_subtraction_uninverted(__dc_tile *outer, __dc_tile *inner){
   //ascertain the table that we'll need to look up.
-  int table = lhs_epoch - rhs_epoch;
-  int lookup_index = table_addsub_index(table, lhs_lattice, rhs_lattice);
+  int table = outer->epoch - inner->epoch;
+  int lookup_index = table_addsub_index(table, outer->lattice, inner->lattice);
 
   if (table < PENV->table_counts[__SUB_TABLE]){
-    res_lattice = (PENV->tables[__SUB_TABLE])[lookup_index];
-    res_epoch = lhs_epoch - (PENV->tables[__SUB_EPOCH_TABLE])[lookup_index];
+    outer->lattice = (PENV->tables[__SUB_TABLE])[lookup_index];
+    outer->epoch = outer->epoch - (PENV->tables[__SUB_EPOCH_TABLE])[lookup_index];
   } else {
-    return (res_negative ? next(lhs) : prev(lhs));
+    return (outer->negative ? next(tile_synth(outer)) : prev(tile_synth(outer)));
   }
 
-  if (res_epoch < 0){
-    res_inverted = true;
-    res_epoch = 0;
-    res_lattice = (PENV->tables[__INVERTED_SUB_TABLE])[lookup_index];
+  if (outer->epoch < 0){
+    outer->inverted = true;
+    outer->epoch = 0;
+    outer->lattice = (PENV->tables[__INVERTED_SUB_TABLE])[lookup_index];
   }
 
-  return pf_synth(res_negative, res_inverted, res_epoch, res_lattice);
+  return tile_synth(outer);
 }
 
-static PTile exact_arithmetic_subtraction_inverted(PTile lhs, PTile rhs){
-  bool res_negative = is_tile_negative(lhs);
-  long long res_epoch;
-  long long rhs_epoch = tile_epoch(rhs);
-  long long lhs_epoch = tile_epoch(lhs);
-  unsigned long long res_lattice;
-  unsigned long long lhs_lattice = tile_lattice(lhs);
-  unsigned long long rhs_lattice = tile_lattice(rhs);
-
+static PTile exact_arithmetic_subtraction_inverted(__dc_tile *outer, __dc_tile *inner){
   //ascertain the table that we'll need to look up.
-  int table = rhs_epoch - lhs_epoch;
+  int table = inner->epoch - outer->epoch;
+  int index = table_addsub_index(table, outer->lattice, inner->lattice);
 
-  if (table < PENV->table_counts[__SUB_INVERTED_TABLE]){
-    res_lattice = (PENV->tables[__SUB_INVERTED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
-    res_epoch = lhs_epoch + (PENV->tables[__SUB_INVERTED_EPOCH_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
+  if (table < PENV->table_counts[__SUB_INVERTED_TABLE]) {
+    outer->lattice = (PENV->tables[__SUB_INVERTED_TABLE])[index];
+    outer->epoch = outer->epoch + (PENV->tables[__SUB_INVERTED_EPOCH_TABLE])[index];
   } else {
-    return (res_negative ? next(lhs) : prev(lhs));
+    return (outer->negative ? next(tile_synth(outer)) : prev(tile_synth(outer)));
   }
 
-  return pf_synth(res_negative, true, res_epoch, res_lattice);
+  return tile_synth(outer);
 }
 
-static PTile exact_arithmetic_subtraction_crossed(PTile lhs, PTile rhs){
-  bool res_negative = is_tile_negative(lhs);
-  bool res_inverted = false;
-  long long res_epoch;
-  long long rhs_epoch = tile_epoch(rhs);
-  long long lhs_epoch = tile_epoch(lhs);
-  unsigned long long res_lattice;
-  unsigned long long lhs_lattice = tile_lattice(lhs);
-  unsigned long long rhs_lattice = tile_lattice(rhs);
-
+static PTile exact_arithmetic_subtraction_crossed(__dc_tile *outer, __dc_tile *inner){
   //ascertain the table that we'll need to look up.
-  int table = rhs_epoch + lhs_epoch;
+  int table = outer->epoch + inner->epoch;
+  int index = table_addsub_index(table, outer->lattice, inner->lattice);
 
   if (table < PENV->table_counts[__SUB_CROSSED_TABLE]){
-    res_lattice = (PENV->tables[__SUB_CROSSED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
-    res_epoch = lhs_epoch - (PENV->tables[__SUB_CROSSED_EPOCH_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
+    outer->lattice = (PENV->tables[__SUB_CROSSED_TABLE])[index];
+    outer->epoch = outer->epoch - (PENV->tables[__SUB_CROSSED_EPOCH_TABLE])[index];
   } else {
-    return (res_negative ? next(lhs) : prev(lhs));
+    return (outer->negative ? next(tile_synth(outer)) : prev(tile_synth(outer)));
   }
 
-  if (res_epoch < 0){
-    res_inverted = true;
-    res_epoch = 0;
-    res_lattice = (PENV->tables[__INVERTED_SUB_CROSSED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
+  if (outer->epoch < 0){
+    outer->inverted = true;
+    outer->epoch = 0;
+    outer->lattice = (PENV->tables[__INVERTED_SUB_CROSSED_TABLE])[index];
   }
 
-  return pf_synth(res_negative, res_inverted, res_epoch, res_lattice);
+  return tile_synth(outer);
 }
 
-PTile exact_arithmetic_subtraction(PTile lhs, PTile rhs){
-  //check to see if they're equal.
-  if (lhs == rhs) {return __zero;}
 
-  //the numbers should have the same sign.  But we should order them so that the
-  //first one is outer, and the second one is inner.
-
-  bool signswap = is_tile_negative(lhs) ^ (__s(lhs) < __s(rhs));
-
-  PTile outer = signswap ? rhs : lhs;
-  PTile inner = signswap ? lhs : rhs;
-  PTile temp;
-
-  if (is_tile_inverted(outer) ^ is_tile_inverted(inner)) {
-    temp = exact_arithmetic_subtraction_crossed(outer, inner);
-  } else if (is_tile_inverted(outer)) {
-    temp = exact_arithmetic_subtraction_inverted(outer, inner);
+PTile dc_arithmetic_subtraction(__dc_tile *outer, __dc_tile *inner){
+  if (outer->inverted ^ inner->inverted) {
+    return exact_arithmetic_subtraction_crossed(outer, inner);
+  } else if (outer->inverted) {
+    return exact_arithmetic_subtraction_inverted(outer, inner);
   } else {
-    temp = exact_arithmetic_subtraction_uninverted(outer, inner);
+    return exact_arithmetic_subtraction_uninverted(outer, inner);
   }
-
-  return (signswap) ? tile_additiveinverse(temp) : temp;
 }
