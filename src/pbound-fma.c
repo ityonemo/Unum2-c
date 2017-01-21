@@ -2,29 +2,97 @@
 #include "../include/pbound.h"
 #include "../include/ptile.h"
 #include <stdio.h>
+/*
+
+////////////////////////////////////////////////////////////////////////////////
+// DECOMPOSED ADD/SUB FUNCTIONS
+
+
+
+//the numbers should have the same sign.  But we should order them so that the
+//first one is outer, and the second one is inner.
+
+static void dc_arithmetic_subtraction(__dc_tile *sub_result, PTile rhs){
+  bool signswap = (sub_result->negative) ^ (dc_less(sub_result, rhs));
+
+  PTile outer = signswap ? rhs : lhs;
+  PTile inner = signswap ? lhs : rhs;
+  PTile temp;
+
+  if (is_tile_inverted(outer) ^ is_tile_inverted(inner)) {
+    temp = exact_arithmetic_subtraction_crossed(outer, inner);
+  } else if (is_tile_inverted(outer)) {
+    temp = exact_arithmetic_subtraction_inverted(outer, inner);
+  } else {
+    temp = exact_arithmetic_subtraction_uninverted(outer, inner);
+  }
+
+  sub_result->negative = (signswap) ^ sub_result->negative;
+}
+
+
+
+
+
+
+
+
+static void dc_add(__dc_tile *add_result, PTile rhs){
+  if ((add_result->negative) ^ is_tile_negative(rhs)){
+    dc_arithmetic_subtraction(add_result, tile_additiveinverse(rhs));
+  } else {
+    dc_arithmetic_addition(add_result, rhs);
+  }
+}
 
 PTile exact_fma(PTile a, PTile b, PTile c, bool upper){
-  return __inf;
+
+  //put onto a stack a decomposed result placeholder.
+  dc_tile dc_result;
+
+  dc_mul(&dc_result, a, b)
+
+  //next check to see if the result is exact.
+
+  if (dc_result.lattice % 2 == 0){
+    //next check to see if they are additive inverses.
+    if (dc_is_additive_inverse(&dc_result, c)) { return __zero;}
+
+    dc_add(&dc_result, c)
+  } else if (upper) {
+    dc_lub(&dc_result)
+    if (dc_is_additive_inverse(&dc_result, c)) { return __nfew;}
+    dc_add(&dc_result, c)
+    dc_lower_ulp(&dc_result)
+
+  } else {
+    dc_glb(&dc_result)
+    if (dc_is_additive_inverse(&dc_result, c)) { return __few;}
+    dc_add(&dc_result, c)
+    dc_upper_ulp(&dc_result)
+  }
+
+  return pf_synth(dc_result->negative, dc_result->inverted, dc_result->epoch, dc_result->lattice)
 }
 
 PTile inexact_fma(PTile a, PTile b, PTile c, bool upper){
   if (upper){
-    bool mul_res_sign = is_tile_negative(a) ^ is_tile_negative(b)
+    bool mul_res_sign = is_tile_negative(a) ^ is_tile_negative(b);
     // if the result is negative, the upper value will result from the inner values for both
     // if the result is positive, the upper value will result from the outer values for both.
-    PTile a_bound = (mul_res_sign ^ is_tile_negative(a)) ? glb(a) : lub(a)
-    PTile b_bound = (mul_res_sign ^ is_tile_negative(b)) ? glb(b) : lub(b)
+    PTile a_bound = (mul_res_sign ^ is_tile_negative(a)) ? glb(a) : lub(a);
+    PTile b_bound = (mul_res_sign ^ is_tile_negative(b)) ? glb(b) : lub(b);
 
-    return lower_ulp(exact_fma(a_bound, b_bound, lub(c), true))
+    return lower_ulp(exact_fma(a_bound, b_bound, lub(c), true));
   } else {
     //decide if the multiplication result will be positive or negative.
-    bool mul_res_sign = is_tile_negative(a) ^ is_tile_negative(b)
+    bool mul_res_sign = is_tile_negative(a) ^ is_tile_negative(b);
     //if the result is negative, the lower value will be the outer values for both
     //if the result is positive, the lower value will result from the inner values for both.
-    PTile a_bound = (mul_res_sign ^ is_tile_negative(a)) ? lub(a) : glb(a)
-    PTile b_bound = (mul_res_sign ^ is_tile_negative(b)) ? lub(b) : glb(b)
+    PTile a_bound = (mul_res_sign ^ is_tile_negative(a)) ? lub(a) : glb(a);
+    PTile b_bound = (mul_res_sign ^ is_tile_negative(b)) ? lub(b) : glb(b);
 
-    return upper_ulp(exact_fma(a_bound, b_bound, glb(c), false))
+    return upper_ulp(exact_fma(a_bound, b_bound, glb(c), false));
   }
 }
 
@@ -177,7 +245,7 @@ void std_fma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
 }
 
 void pfma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
-  /*perfoms fma(a,b,c) == a * b + c */
+  //perfoms fma(a,b,c) == a * b + c
 
   //terminate early on special values.
 
@@ -202,3 +270,4 @@ void pfma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
   else if (roundszero(b)) {zero_fma(res, b, a, c);}
   else                    {std_fma(res, b, a, c);}
 }
+*/

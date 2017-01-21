@@ -21,12 +21,12 @@ int table_addsub_index(int table, long long lhs_lattice, long long rhs_lattice){
 
 static PTile exact_arithmetic_addition_crossed(PTile lhs, PTile rhs){
 
-  int res_epoch = pf_epoch(lhs);
+  int res_epoch = tile_epoch(lhs);
   unsigned long long res_lattice;
-  unsigned long long lhs_lattice = pf_lattice(lhs);
-  unsigned long long rhs_lattice = pf_lattice(rhs);
+  unsigned long long lhs_lattice = tile_lattice(lhs);
+  unsigned long long rhs_lattice = tile_lattice(rhs);
   bool res_negative = is_tile_negative(lhs);
-  int table = pf_epoch(rhs) + res_epoch;
+  int table = tile_epoch(rhs) + res_epoch;
 
   if (table < PENV->table_counts[__ADD_CROSSED_TABLE]){
     res_lattice = (PENV->tables[__ADD_CROSSED_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];
@@ -40,13 +40,13 @@ static PTile exact_arithmetic_addition_crossed(PTile lhs, PTile rhs){
 
 static PTile exact_arithmetic_addition_inverted(PTile lhs, PTile rhs){
 
-  int res_epoch = pf_epoch(lhs);
+  int res_epoch = tile_epoch(lhs);
   unsigned long long res_lattice;
-  unsigned long long lhs_lattice = pf_lattice(lhs);
-  unsigned long long rhs_lattice = pf_lattice(rhs);
+  unsigned long long lhs_lattice = tile_lattice(lhs);
+  unsigned long long rhs_lattice = tile_lattice(rhs);
   bool res_negative = is_tile_negative(lhs);
   bool res_inverted = is_tile_inverted(lhs);
-  int table = pf_epoch(rhs) - res_epoch;
+  int table = tile_epoch(rhs) - res_epoch;
   int index = table_addsub_index(table, lhs_lattice, rhs_lattice);
 
   if (table < PENV->table_counts[__ADD_INVERTED_TABLE]) {
@@ -72,12 +72,12 @@ static PTile exact_arithmetic_addition_inverted(PTile lhs, PTile rhs){
 }
 
 static PTile exact_arithmetic_addition_uninverted(PTile lhs, PTile rhs){
-  int res_epoch = pf_epoch(lhs);
+  int res_epoch = tile_epoch(lhs);
   unsigned long long res_lattice;
-  unsigned long long lhs_lattice = pf_lattice(lhs);
-  unsigned long long rhs_lattice = pf_lattice(rhs);
+  unsigned long long lhs_lattice = tile_lattice(lhs);
+  unsigned long long rhs_lattice = tile_lattice(rhs);
   bool res_negative = is_tile_negative(lhs);
-  int table = res_epoch - pf_epoch(rhs);
+  int table = res_epoch - tile_epoch(rhs);
 
   if (table < PENV->table_counts[__ADD_TABLE]){
     res_lattice = (PENV->tables[__ADD_TABLE])[table_addsub_index(table, lhs_lattice, rhs_lattice)];

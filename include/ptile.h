@@ -1,7 +1,16 @@
 #ifndef __PTILE_H
 #define __PTILE_H
 
+//long int aliased as tile.
 typedef unsigned long long PTile;
+
+//decomposed tile structure
+typedef struct {
+  long long          epoch;
+  unsigned long long lattice;
+  bool               negative;
+  bool               inverted;
+} __dc_tile;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Properties of PTiles
@@ -23,12 +32,15 @@ PTile glb(PTile x);
 PTile lub(PTile x);
 PTile upper_ulp(PTile x);
 PTile lower_ulp(PTile x);
+PTile outer_ulp(PTile x);
+PTile inner_ulp(PTile x);
 
 ////////////////////////////////////////////////////////////////////////////////
 // synthesis and decomposition tools
+PTile    tile_synth(__dc_tile *definition);
 PTile    pf_synth(bool negative, bool inverted, long long epoch, unsigned long long lattice);
-long long pf_epoch(PTile value);
-unsigned long long pf_lattice(PTile value);
+long long tile_epoch(PTile value);
+unsigned long long tile_lattice(PTile value);
 
 ////////////////////////////////////////////////////////////////////////////////
 // math tools

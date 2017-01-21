@@ -15,11 +15,11 @@ static PTile exact_arithmetic_subtraction_uninverted(PTile lhs, PTile rhs){
   bool res_negative = is_tile_negative(lhs);
   bool res_inverted = false;
   long long res_epoch;
-  long long rhs_epoch = pf_epoch(rhs);
-  long long lhs_epoch = pf_epoch(lhs);
+  long long rhs_epoch = tile_epoch(rhs);
+  long long lhs_epoch = tile_epoch(lhs);
   unsigned long long res_lattice;
-  unsigned long long lhs_lattice = pf_lattice(lhs);
-  unsigned long long rhs_lattice = pf_lattice(rhs);
+  unsigned long long lhs_lattice = tile_lattice(lhs);
+  unsigned long long rhs_lattice = tile_lattice(rhs);
 
   //figure out the table delta.
 
@@ -46,11 +46,11 @@ static PTile exact_arithmetic_subtraction_uninverted(PTile lhs, PTile rhs){
 static PTile exact_arithmetic_subtraction_inverted(PTile lhs, PTile rhs){
   bool res_negative = is_tile_negative(lhs);
   long long res_epoch;
-  long long rhs_epoch = pf_epoch(rhs);
-  long long lhs_epoch = pf_epoch(lhs);
+  long long rhs_epoch = tile_epoch(rhs);
+  long long lhs_epoch = tile_epoch(lhs);
   unsigned long long res_lattice;
-  unsigned long long lhs_lattice = pf_lattice(lhs);
-  unsigned long long rhs_lattice = pf_lattice(rhs);
+  unsigned long long lhs_lattice = tile_lattice(lhs);
+  unsigned long long rhs_lattice = tile_lattice(rhs);
 
   //ascertain the table that we'll need to look up.
   int table = rhs_epoch - lhs_epoch;
@@ -69,11 +69,11 @@ static PTile exact_arithmetic_subtraction_crossed(PTile lhs, PTile rhs){
   bool res_negative = is_tile_negative(lhs);
   bool res_inverted = false;
   long long res_epoch;
-  long long rhs_epoch = pf_epoch(rhs);
-  long long lhs_epoch = pf_epoch(lhs);
+  long long rhs_epoch = tile_epoch(rhs);
+  long long lhs_epoch = tile_epoch(lhs);
   unsigned long long res_lattice;
-  unsigned long long lhs_lattice = pf_lattice(lhs);
-  unsigned long long rhs_lattice = pf_lattice(rhs);
+  unsigned long long lhs_lattice = tile_lattice(lhs);
+  unsigned long long rhs_lattice = tile_lattice(rhs);
 
   //ascertain the table that we'll need to look up.
   int table = rhs_epoch + lhs_epoch;

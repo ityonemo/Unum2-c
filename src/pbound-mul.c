@@ -3,96 +3,90 @@
 #include "../include/ptile.h"
 #include <stdio.h>
 
-static bool __resultparity(PTile lhs, PTile rhs){
-  return is_tile_negative(lhs) ^ is_tile_negative(rhs);
-}
 
-//for now, let's make this output single.
-void exact_arithmetic_multiplication(PBound *dest, PTile lhs, PTile rhs){
+static bool __resultparity(PTile lhs, PTile rhs) {return is_tile_negative(lhs) ^ is_tile_negative(rhs);}
 
-  long long res_epoch = pf_epoch(lhs) + pf_epoch(rhs);
-  unsigned long long lhs_lattice = pf_lattice(lhs);
-  unsigned long long rhs_lattice = pf_lattice(rhs);
-  unsigned long long res_lattice = 0;
+static void dc_arithmetic_multiplication(__dc_tile *mul_result, PTile lhs, PTile rhs){
+  mul_result->epoch = tile_epoch(lhs) + tile_epoch(rhs);
+  unsigned long long lhs_lattice = tile_lattice(lhs);
+  unsigned long long rhs_lattice = tile_lattice(rhs);
 
   //lattice values of zero aren't stored in the lookup matrix.
   if (lhs_lattice == 0) {
-    res_lattice = rhs_lattice;
+    mul_result->lattice = rhs_lattice;
   } else if (rhs_lattice == 0) {
-    res_lattice = lhs_lattice;
+    mul_result->lattice = lhs_lattice;
   } else {
-    res_lattice = (PENV->tables[__MUL_TABLE])[muldiv_index(lhs_lattice, rhs_lattice)];
+    mul_result->lattice = (PENV->tables[__MUL_TABLE])[muldiv_index(lhs_lattice, rhs_lattice)];
 
     //check to see if we need to modify the epoch
-    if (res_lattice < lhs_lattice) {res_epoch += 1;}
+    if (mul_result->lattice < lhs_lattice) {mul_result->epoch += 1;}
   }
 
-  //check for sign issues.
-  bool res_sign = is_tile_negative(lhs) ^ is_tile_negative(rhs);
-  set_single(dest, pf_synth(res_sign, is_tile_inverted(lhs), res_epoch, res_lattice));
+  mul_result->inverted = is_tile_inverted(lhs);
+  mul_result->negative = is_tile_negative(lhs) ^ is_tile_negative(rhs);
+
   return;
 }
 
-
-static void pf_exact_mul(PBound *dest, PTile lhs, PTile rhs){
-  //this needs to be here to avoid parity tests causing strange results.
-  if (is_tile_inf(lhs) || is_tile_inf(rhs)) {set_inf(dest); return;}
-  if (is_tile_zero(lhs) || is_tile_zero(rhs)) {set_zero(dest); return;}
-  if (lhs == __one) {set_single(dest, rhs); return;}
-  if (rhs == __one) {set_single(dest, lhs); return;}
-  if (lhs == (__one | __inf)) {set_single(dest, tile_additiveinverse(rhs)); return;}
-  if (rhs == (__one | __inf)) {set_single(dest, tile_additiveinverse(lhs)); return;}
-
+void dc_mul(__dc_tile *mul_result, PTile lhs, PTile rhs){
   if (is_tile_inverted(lhs) ^ is_tile_inverted(rhs)){
-    exact_arithmetic_division(dest, lhs, tile_multiplicativeinverse(rhs));
+    dc_arithmetic_division(mul_result, lhs, tile_multiplicativeinverse(rhs));
   } else {
-    exact_arithmetic_multiplication(dest, lhs, rhs);
+    dc_arithmetic_multiplication(mul_result, lhs, rhs);
   }
+}
+
+static PTile tile_exact_mul(PTile lhs, PTile rhs){
+  //this needs to be here to avoid parity tests causing strange results.
+  if (is_tile_inf(lhs) || is_tile_inf(rhs))   {return __inf;}
+  if (is_tile_zero(lhs) || is_tile_zero(rhs)) {return __zero;}
+  if (lhs == __one)                           {return rhs;}
+  if (rhs == __one)                           {return lhs;}
+  if (lhs == (__one | __inf))                 {return tile_additiveinverse(rhs);}
+  if (rhs == (__one | __inf))                 {return tile_additiveinverse(lhs);}
+
+  __dc_tile mul_result;
+
+  dc_mul(&mul_result, lhs, rhs);
+
+  return tile_synth(&mul_result);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // INNER, OUTER, UPPER, and LOWER inexact mults.
 
-static PTile pf_inexact_mul_outer(PTile lhs, PTile rhs){
+static PTile inexact_mul_outer_bound(PTile lhs, PTile rhs){
 
   //calculate proper outer bounds.
   PTile _outer_lhs = is_tile_positive(lhs) ? lub(lhs) : glb(lhs);
   PTile _outer_rhs = is_tile_positive(rhs) ? lub(rhs) : glb(rhs);
 
-  //create a temporary PBound to hold the prospective value.
-  PBound res_temp = __EMPTYBOUND;
-  pf_exact_mul(&res_temp, _outer_lhs, _outer_rhs);
-  if (issingle(&res_temp)) {return res_temp.lower;};
-  return is_tile_positive(res_temp.lower) ? res_temp.upper : res_temp.lower;
+  return tile_exact_mul(_outer_lhs, _outer_rhs);
 }
 
-static PTile pf_inexact_mul_inner(PTile lhs, PTile rhs){
+static PTile inexact_mul_inner_bound(PTile lhs, PTile rhs){
 
   PTile _inner_lhs = is_tile_positive(lhs) ? glb(lhs) : lub(lhs);
   PTile _inner_rhs = is_tile_positive(rhs) ? glb(rhs) : lub(rhs);
 
-  //create a temporary PBound to hold the prospective value.
-  PBound res_temp = __EMPTYBOUND;
-  pf_exact_mul(&res_temp, _inner_lhs, _inner_rhs);
-
-  if (issingle(&res_temp)) {return res_temp.lower;};
-  return is_tile_negative(res_temp.lower) ? res_temp.upper : res_temp.lower;
+  return tile_exact_mul(_inner_lhs, _inner_rhs);
 }
 
-static PTile pf_inexact_mul_lower(PTile lhs, PTile rhs){
-  return upper_ulp(__resultparity(lhs, rhs) ? pf_inexact_mul_outer(lhs, rhs) : pf_inexact_mul_inner(lhs, rhs));
+static PTile inexact_mul_lower(PTile lhs, PTile rhs){
+  return upper_ulp(__resultparity(lhs, rhs) ? inexact_mul_outer_bound(lhs, rhs) : inexact_mul_inner_bound(lhs, rhs));
 }
 
-static PTile pf_inexact_mul_upper(PTile lhs, PTile rhs){
-  return lower_ulp(__resultparity(lhs, rhs) ? pf_inexact_mul_inner(lhs, rhs) : pf_inexact_mul_outer(lhs, rhs));
+static PTile inexact_mul_upper(PTile lhs, PTile rhs){
+  return lower_ulp(__resultparity(lhs, rhs) ? inexact_mul_inner_bound(lhs, rhs) : inexact_mul_outer_bound(lhs, rhs));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // FULL inexact mult.
 
-static void pf_inexact_mul(PBound *dest, PTile lhs, PTile rhs){
-  PTile _l = pf_inexact_mul_lower(lhs, rhs);
-  PTile _u = pf_inexact_mul_upper(lhs, rhs);
+static void inexact_mul(PBound *dest, PTile lhs, PTile rhs){
+  PTile _l = inexact_mul_lower(lhs, rhs);
+  PTile _u = inexact_mul_upper(lhs, rhs);
   set_bound(dest, _l, _u);
 }
 
@@ -125,9 +119,9 @@ static void mul_pf_single(PBound *dest, PTile lhs, PTile rhs)
   //////////////////////////////////////////////////////////////////////////////
 
   if (is_tile_exact(lhs) && is_tile_exact(rhs)){
-    pf_exact_mul(dest, lhs, rhs);
+    set_single(dest, tile_exact_mul(lhs, rhs));
   }else{
-    pf_inexact_mul(dest, lhs, rhs);
+    inexact_mul(dest, lhs, rhs);
   }
 }
 

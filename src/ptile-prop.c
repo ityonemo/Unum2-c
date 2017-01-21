@@ -35,7 +35,7 @@ bool is_tile_zero(PTile x){
   return (x == __zero);
 }
 
-bool is_tile_inverted(PTile x){
+bool is_tile_exact(PTile x){
   return (x & (PENV->increment)) == 0;
 }
 
