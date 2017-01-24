@@ -3,9 +3,9 @@
 #include "../include/ptile.h"
 #include <stdio.h>
 
-//a couple of helper functions that we'll need.
+//helper functions for dealing with decomoposed numbers that we'll need.
 
-static void dc_lvdn(__dc_tile *value){
+__dc_tile *dc_lvdn(__dc_tile *value){
   if (value->lattice == 0){
     if (value->epoch == 0){
       value->lattice = 1;
@@ -17,9 +17,10 @@ static void dc_lvdn(__dc_tile *value){
   } else {
     value->lattice -= 1;
   }
+  return value;
 }
 
-static void dc_lvup(__dc_tile * value){
+__dc_tile *dc_lvup(__dc_tile * value){
   unsigned long long max_lattice = (1 << PENV->latticebits) - 1;
   if (value->lattice == max_lattice){
     value->lattice = 0;
@@ -27,6 +28,7 @@ static void dc_lvup(__dc_tile * value){
   } else {
     value->lattice += 1;
   }
+  return value;
 }
 
 static void dc_lub(__dc_tile *value) {
@@ -57,6 +59,14 @@ static bool dc_is_additive_inverse(__dc_tile *a, __dc_tile *b){
   return true;
 }
 
+static bool dc_is_inner(__dc_tile *a, __dc_tile *b){
+  if (a->inverted ^ b->inverted){return a->inverted;}
+  if (a->epoch != b->epoch) {return (a->epoch < b->epoch) ^ (a->inverted);}
+  if (a->lattice != b->lattice) {return (a->lattice < b->lattice) ^ (a->inverted);}
+  //otherwise the values are identical magnitude.
+  return false;
+}
+
 static void dc_lower_ulp(__dc_tile *value){
   if ((value->lattice % 2) == 0){
     if (value->negative ^ value->inverted) {
@@ -77,40 +87,74 @@ static void dc_upper_ulp(__dc_tile *value) {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 
 PTile exact_fma(PTile a, PTile b, PTile c, bool upper){
-
   //put onto a stack a decomposed result placeholder.
-  __dc_tile dc_result;
+  __dc_tile m_dc;
 
-  dc_mul(&dc_result, a, b);
+  dc_mul(&m_dc, a, b);
 
   DECOMPOSE(c)
 
   //next check to see if the result is exact.
+  //printf("mul result:  epoch %llX, lattice %llX, neg %s, inv %s\n", m_dc.epoch, m_dc.lattice,
+  //    (m_dc.negative) ? "true" : "false",
+  //    (m_dc.inverted) ? "true" : "false");
 
-  if (dc_result.lattice % 2 == 0){
-    //consider swapping the values.
+  //TODO:  THIS CODE IS UGLY.  CONSIDER FIXING IT.
 
-    //next check to see if they are additive inverses.
-    if (dc_is_additive_inverse(&dc_result, &c_dc)) { return __zero;}
+  //consider swapping the order to make sure sub/add are passed outer, inner
+  __dc_tile *o_dc;
+  __dc_tile *i_dc;
+  PTile res;
 
-    return dc_arithmetic_addition(&dc_result, &c_dc);
-
-  } else if (upper) {
-    dc_lub(&dc_result);
-    if (dc_is_additive_inverse(&dc_result, &c_dc)) { return __nfew;}
-    dc_arithmetic_addition(&dc_result, &c_dc);
-    dc_lower_ulp(&dc_result);
-
-  } else {
-    dc_glb(&dc_result);
-    if (dc_is_additive_inverse(&dc_result, &c_dc)) { return __few;}
-    dc_arithmetic_addition(&dc_result, &c_dc);
-    dc_upper_ulp(&dc_result);
+  if (m_dc.lattice % 2 != 0){
+    if (upper) {
+      dc_lub(&m_dc);
+    } else {
+      dc_glb(&m_dc);
+    }
   }
 
-  return tile_synth(&dc_result);
+  if (dc_is_inner(&m_dc, &c_dc)){
+    o_dc = &c_dc;
+    i_dc = &m_dc;
+  } else {
+    o_dc = &m_dc;
+    i_dc = &c_dc;
+  }
+
+  if (dc_is_additive_inverse(o_dc, i_dc)){
+    res = __zero;
+  } else {
+
+    res = (m_dc.negative ^ c_dc.negative) ? dc_arithmetic_subtraction(o_dc, i_dc) : dc_arithmetic_addition(o_dc, i_dc);
+  }
+
+  if (m_dc.lattice % 2 == 0){
+    return res;
+  } else {
+    return (upper) ? lower_ulp(res) : upper_ulp(res);
+  }
+}
+
+//we are doing a thing where we are splitting c into lub and glb values; so it
+//these may wind up being values that are incompatible with decomposition.
+static PTile check_exact_fma(PTile a, PTile b, PTile c, bool upper){
+
+  //printf("-------------\n");
+  //printf("a, %llX\n",a);
+  //printf("b, %llX\n",b);
+  //printf("c, %llX\n",c);
+
+  //if (is_tile_zero(c)) {printf("tile_mul: %llX\n", tile_mul(a,b,upper));}
+
+  if (is_tile_zero(a) || is_tile_zero(b)) {return c;}
+  if (is_tile_inf(a) || is_tile_inf(b)) {return __inf;}
+  if (is_tile_inf(c)) {return upper ? __many : __nmany;}
+  if (is_tile_zero(c)) {return tile_mul(a, b, upper);}
+  return exact_fma(a, b, c, upper);
 }
 
 PTile inexact_fma(PTile a, PTile b, PTile c, bool upper){
@@ -121,7 +165,7 @@ PTile inexact_fma(PTile a, PTile b, PTile c, bool upper){
     PTile a_bound = (mul_res_sign ^ is_tile_negative(a)) ? glb(a) : lub(a);
     PTile b_bound = (mul_res_sign ^ is_tile_negative(b)) ? glb(b) : lub(b);
 
-    return lower_ulp(exact_fma(a_bound, b_bound, lub(c), true));
+    return lower_ulp(check_exact_fma(a_bound, b_bound, lub(c), true));
   } else {
     //decide if the multiplication result will be positive or negative.
     bool mul_res_sign = is_tile_negative(a) ^ is_tile_negative(b);
@@ -130,9 +174,12 @@ PTile inexact_fma(PTile a, PTile b, PTile c, bool upper){
     PTile a_bound = (mul_res_sign ^ is_tile_negative(a)) ? lub(a) : glb(a);
     PTile b_bound = (mul_res_sign ^ is_tile_negative(b)) ? lub(b) : glb(b);
 
-    return upper_ulp(exact_fma(a_bound, b_bound, glb(c), false));
+    return upper_ulp(check_exact_fma(a_bound, b_bound, glb(c), false));
   }
 }
+
+static bool is_tile_one(PTile x)     {return x == __one;}
+static bool is_tile_neg_one(PTile x) {return x == (__one | __inf);}
 
 PTile tile_fma(PTile a, PTile b, PTile c, bool upper){
   //fma for tile values.
@@ -149,11 +196,79 @@ PTile tile_fma(PTile a, PTile b, PTile c, bool upper){
   else if (is_tile_neg_one(a)) {return tile_add(c, -b, upper);}
   else if (is_tile_neg_one(b)) {return tile_add(c, -a, upper);}
 
-  if (is_tile_exact(a) && is_tile_exact(b) && is_tile_exact(c))
-    { return exact_fma(a, b, c, upper); }
-  else
-    { return inexact_fma(a, b, c, upper); }
+  if (is_tile_exact(a) && is_tile_exact(b) && is_tile_exact(c)){
+    return exact_fma(a, b, c, upper);
+  } else {
+    return inexact_fma(a, b, c, upper);
+  }
 }
+
+
+void single_fma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
+
+  PTile c_upper_proxy, lower_tile, upper_tile;
+
+  if (issingle(b)){
+    //special case:  a is zero.
+    if (is_tile_zero(a->lower)){
+      //check if b is infinity, in which case drop allreals and quit.
+      if (is_tile_inf(b->lower)) {set_allreals(res); return;}
+      //turn res into c.
+      pcopy(res, c);
+      return;
+    }
+    //special case: b is zero - should be symmetric to the a case.
+    if (is_tile_zero(b->lower)){
+      //check if b is infinity, in which case drop allreals and quit.
+      if (is_tile_inf(a->lower)) {set_allreals(res); return;}
+      //turn res into c.
+      pcopy(res, c);
+      return;
+    }
+
+    //special case: a or b is infinity.
+    if (is_tile_inf(a->lower)) {set_single(res, __inf); return;}
+    if (is_tile_inf(b->lower)) {set_single(res, __inf); return;}
+
+    //now just do the fma.
+    c_upper_proxy = issingle(c) ? c->lower : c->upper;
+
+    lower_tile = tile_fma(a->lower, b->lower, c->lower, false);
+    upper_tile = tile_fma(a->lower, b->lower, c_upper_proxy, true);
+
+    //printf("lower: %llX\n", lower_tile);
+    //printf("upper: %llX\n", upper_tile);
+
+    if (roundsinf(c) && (__s(prev(lower_tile)) <= __s(upper_tile))) {set_allreals(res); return;}
+
+  } else {  //b is a bound.
+    if (is_tile_zero(a->lower)) {
+      if (roundsinf(b)) {set_allreals(res); return;}
+      pcopy(res, c);
+      return;
+    }
+
+    if (is_tile_inf(a->lower) && roundszero(b)) {set_allreals(res); return;}
+
+    //check the sign of the result.  If a is negative, its effecs on b will be
+    //flipped.
+
+    if (is_tile_positive(a->lower)){
+      c_upper_proxy = issingle(c) ? c->lower : c->upper;
+      lower_tile = tile_fma(a->lower, b->lower, c->lower, false);
+      upper_tile = tile_fma(a->lower, b->upper, c_upper_proxy, true);
+    } else {
+      c_upper_proxy = issingle(c) ? c->lower : c->upper;
+      lower_tile = tile_fma(a->lower, b->upper, c->lower, false);
+      upper_tile = tile_fma(a->lower, b->lower, c_upper_proxy, true);
+    }
+
+    if ((roundinf(b) || roundsinf(c)) && (__s(prev(lower_tile)) <= __s(upper_tile))) {set_allreals(res); return;}
+  }
+
+  set_bound(res, lower_tile, upper_tile);
+  collapseifsingle(res);
+};
 
 //inf fma - fused multiply add when the first multiply term contains infinity.
 void inf_fma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
@@ -283,6 +398,8 @@ void std_fma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
 }
 
 void pfma(PBound *res, const PBound *a, const PBound *b, const PBound *c){
+
+  //printf("pfma inputs: %llX, %llX, %llX \n", a->lower, b->lower, c->lower);
   //perfoms fma(a,b,c) == a * b + c
 
   //terminate early on special values.

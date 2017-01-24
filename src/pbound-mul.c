@@ -146,6 +146,17 @@ static void mul_upper(PBound *dest, PTile lhs, PTile rhs){  //bail if this probl
   }
 };
 
+//TODO:  Fix this so that this is the main clearinghouse function instead of
+//subcalling a function that awkwardly temporarily creates a temporary bound
+//value.  Requires instantiating proper outside check.
+PTile tile_mul(PTile lhs, PTile rhs, bool upper){
+  PBound temp;
+  mul_pf_single(&temp, lhs, rhs);
+  PTile upper_proxy = issingle(&temp) ? temp.lower : temp.upper;
+
+  return upper ? upper_proxy : temp.lower;
+}
+
 static void single_mul(PBound *dest, const PBound *lhs, const PBound *rhs)
 {
   if (lhs->lower == __one) {pcopy(dest, rhs); return;}

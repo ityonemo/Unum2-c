@@ -20,7 +20,7 @@ static PTile exact_arithmetic_subtraction_uninverted(__dc_tile *outer, __dc_tile
     outer->lattice = (PENV->tables[__SUB_TABLE])[lookup_index];
     outer->epoch = outer->epoch - (PENV->tables[__SUB_EPOCH_TABLE])[lookup_index];
   } else {
-    return (outer->negative ? next(tile_synth(outer)) : prev(tile_synth(outer)));
+    return tile_synth(dc_lvdn(outer));
   }
 
   if (outer->epoch < 0){
@@ -41,7 +41,7 @@ static PTile exact_arithmetic_subtraction_inverted(__dc_tile *outer, __dc_tile *
     outer->lattice = (PENV->tables[__SUB_INVERTED_TABLE])[index];
     outer->epoch = outer->epoch + (PENV->tables[__SUB_INVERTED_EPOCH_TABLE])[index];
   } else {
-    return (outer->negative ? next(tile_synth(outer)) : prev(tile_synth(outer)));
+    return tile_synth(dc_lvup(outer));
   }
 
   return tile_synth(outer);
@@ -56,7 +56,7 @@ static PTile exact_arithmetic_subtraction_crossed(__dc_tile *outer, __dc_tile *i
     outer->lattice = (PENV->tables[__SUB_CROSSED_TABLE])[index];
     outer->epoch = outer->epoch - (PENV->tables[__SUB_CROSSED_EPOCH_TABLE])[index];
   } else {
-    return (outer->negative ? next(tile_synth(outer)) : prev(tile_synth(outer)));
+    return tile_synth(dc_lvdn(outer));
   }
 
   if (outer->epoch < 0){

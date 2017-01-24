@@ -82,12 +82,15 @@ void div(PBound *dest, const PBound *lhs, const PBound *rhs);
 /* pbound-add.c: */
 int addsub_index(long long lhs_lattice, long long rhs_lattice);
 int table_addsub_index(int table, long long lhs_lattice, long long rhs_lattice);
+
+PTile dc_arithmetic_addition(__dc_tile *outer, __dc_tile *inner);
 /* pbound-div.c: */
 void dc_arithmetic_division(__dc_tile *div_result, PTile lhs, PTile rhs);
 unsigned long long invert(unsigned long long value);
 /* pbound-mul.c: */
 int muldiv_index(long long lhs_lattice, long long rhs_lattice);
 void dc_mul(__dc_tile *mul_result, PTile lhs, PTile rhs);
+PTile tile_mul(PTile lhs, PTile rhs, bool upper);
 /* pbound-sub.c: */
 PTile dc_arithmetic_subtraction(__dc_tile *outer, __dc_tile *inner);
 

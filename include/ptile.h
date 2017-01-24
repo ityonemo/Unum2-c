@@ -42,6 +42,9 @@ PTile    tile_synth(__dc_tile *definition);
 PTile    pf_synth(bool negative, bool inverted, long long epoch, unsigned long long lattice);
 long long tile_epoch(PTile value);
 unsigned long long tile_lattice(PTile value);
+//lattice value up and down functions
+__dc_tile *dc_lvup(__dc_tile * value);
+__dc_tile *dc_lvdn(__dc_tile * value);
 
 //decomposes an identifier into a __dc_tile value with _dc suffix
 #define DECOMPOSE(ident) __dc_tile ident##_dc = {tile_epoch(ident), tile_lattice(ident), is_tile_negative(ident), is_tile_inverted(ident)};

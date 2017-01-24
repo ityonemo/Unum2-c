@@ -28,7 +28,7 @@ static PTile exact_arithmetic_addition_crossed(__dc_tile *outer, __dc_tile *inne
     outer->epoch += (outer->lattice < old_lattice) ? 1 : 0;
     return tile_synth(outer);
   } else {
-    return (outer->negative ? prev(tile_synth(outer)) : next(tile_synth(outer)));
+    return tile_synth(dc_lvup(outer));
   }
 }
 
@@ -40,14 +40,21 @@ static PTile exact_arithmetic_addition_inverted(__dc_tile *outer, __dc_tile *inn
     outer->lattice = (PENV->tables[__ADD_INVERTED_TABLE])[index];
 
     outer->epoch -= (outer->lattice > inner->lattice) ? 1 : 0;
+  } else if (outer->lattice != 0) {
+    return tile_synth(dc_lvdn(outer));
   } else {
-    return (outer->negative ? prev(tile_synth(outer)) : next(tile_synth(outer)));
+    outer->epoch -= 1;
+    outer->lattice = (1 << PENV->latticebits) - 1;
   }
 
   if (outer->epoch < 0){
     outer->inverted = false;
     outer->epoch = 0;
-    outer->lattice = (PENV->tables[__INVERTED_ADD_INVERTED_TABLE])[index];
+    if (table < PENV->table_counts[__ADD_INVERTED_TABLE]) {
+      outer->lattice = (PENV->tables[__INVERTED_ADD_INVERTED_TABLE])[index];
+    } else {
+      outer->lattice = 1;
+    }
   }
 
   return tile_synth(outer);
@@ -59,24 +66,20 @@ static PTile exact_arithmetic_addition_uninverted(__dc_tile *outer, __dc_tile *i
   if (table < PENV->table_counts[__ADD_TABLE]){
     outer->lattice = (PENV->tables[__ADD_TABLE])[table_addsub_index(table, outer->lattice, inner->lattice)];
     outer->epoch += (outer->lattice < inner->lattice) ? 1 : 0;
-
     return tile_synth(outer);
   } else {
-    return (outer->negative ? prev(tile_synth(outer)) : next(tile_synth(outer)));
+    return tile_synth(dc_lvup(outer));
   }
 }
 
-static PTile dc_arithmetic_addition(__dc_tile *outer, __dc_tile *inner){
+PTile dc_arithmetic_addition(__dc_tile *outer, __dc_tile *inner){
   //swap the order of the two terms to make sure that the outer float appears
   //first.
   if ((outer->inverted) ^ (inner->inverted)) {
-    //printf("branch a\n");
     return exact_arithmetic_addition_crossed(outer, inner);
   } else if (outer->inverted) {
-    //printf("branch b\n");
     return exact_arithmetic_addition_inverted(outer, inner);
   } else {
-    //printf("branch c\n");
     return exact_arithmetic_addition_uninverted(outer, inner);
   }
 }
